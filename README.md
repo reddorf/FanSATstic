@@ -1,4 +1,4 @@
 FanSATstic
 ==========
 
-An attempt of SAT solver
+An attempt of local search SAT solver
