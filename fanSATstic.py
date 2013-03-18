@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# TODO DIMACS Parser
+# TODO Optimize DIMACS Parser. Object + Encapsulation?
 # TODO Solver Logic
 
 from sys import argv, exit
+from dimacs import ParseCNF
 
 __program__='FanSATstic - Local Search Sat Solver'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
@@ -17,15 +18,29 @@ __license__='GPL'
 #
 #
 def Main():
+	"""
+	Main(): void
+	"""
 	if len(argv) < 2:
 		PrintHelp()
 		exit(-1)
+
+	dimacs_file = OpenFileOrDie(argv[1], 'r')
+	num_vars, num_clauses, clauses = ParseCNF(dimacs_file)
+	dimacs_file.close()
+	
+	print 'Num Variables:', num_vars
+	print 'Num Clauses:', num_clauses
+	print 'Clauses:'
+	for c in clauses:
+		print c
+
 
 #
 #
 def OpenFileOrDie(fname, mode):
 	"""
-	OpenFileOrDie(fname:string, mode:string) : void
+	OpenFileOrDie(fname:string, mode:string): void
 	Tries to open the specified file with the specified mode.
 	Abort on failure.
 	"""
@@ -38,7 +53,7 @@ def OpenFileOrDie(fname, mode):
 #	
 def PrintHelp():
 	"""
-	PrintHelp() : void
+	PrintHelp(): void
 	Prints a help message on stdout
 	"""
 	print __program__
