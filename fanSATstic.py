@@ -6,6 +6,7 @@
 
 from sys import argv, exit
 from dimacs import ParseCNF
+from gsat import GSAT
 
 __program__='FanSATstic - Local Search Sat Solver'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
@@ -29,13 +30,27 @@ def Main():
 	num_vars, num_clauses, clauses = ParseCNF(dimacs_file)
 	dimacs_file.close()
 	
-	print 'Num Variables:', num_vars
-	print 'Num Clauses:', num_clauses
-	print 'Clauses:'
-	for c in clauses:
-		print c
+	# print 'Num Variables:', num_vars
+	# print 'Num Clauses:', num_clauses
+	# print 'Clauses:'
+	# for c in clauses:
+	# 	print c
 
+	solver = GSAT(num_vars, num_clauses, clauses, len(clauses)/2)
+	res = solver.Solve()
+	print res
+	print FormatResult(res)
 
+#
+#
+def FormatResult(bool_result):
+	s = 'v'
+	for ind,b in enumerate(bool_result):
+		if b:
+			s = s + ' %d' % (ind+1)
+		else:
+			s = s + ' %d' % (-(ind+1) )
+	return s
 #
 #
 def OpenFileOrDie(fname, mode):
@@ -66,5 +81,7 @@ def PrintHelp():
 	print 'Usage:\n%s <input-file>' % (argv[0])
 	print '\tinput-file must be in dimacs cnf format'
 
+#
+#
 if __name__ == '__main__':
 	Main()

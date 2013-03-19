@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sys import stderr
+from itertools import groupby
 
 #
 #
@@ -32,18 +33,23 @@ def ParseCNF(cnf_file):
 				num_clauses = int(lvalues[3])
 
 			else:
+				lvalues = map(int, lvalues)
+				
 				l = []
 				for val in lvalues:
-					if val == '0' and l:
+					if val == 0 and l:
 						cnf_formula.append( l )
 						l = []
 					else:
-						ival = int(val)
-						if ival < -num_vars or ival > num_vars:
+						l.append(val)
+						if val < -num_vars or val > num_vars:
 							raise Exception('Invalid variable %d. '
 											'Variables must be in range [1, %d]'
-											% (ival, num_vars))
-						l.append(int(val))
+											% (val, num_vars))
+							
+				# The same as above in a different way, without checks
+				# cnf_formula.extend(SplitByValue(lvalues, (None, 0)))
+				# [list(g) for k,g in itertools.groupby(iterable,lambda x:x in splitters) if not k]
 
 	except Exception, e:
 		stderr.write('Error parsing file "%s" (%d): %s' % 
@@ -51,3 +57,9 @@ def ParseCNF(cnf_file):
 		raise e
 
 	return (num_vars, num_clauses, cnf_formula)
+
+#
+#
+def SplitByValue(iterable, spliters):
+	return [list(g) for k,g in 
+						groupby(iterable, lambda x: x in spliters) if not k]
