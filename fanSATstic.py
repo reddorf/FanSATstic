@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# WARNING: Converted to python3 but it should run in python 2.7
+
 # TODO Optimize DIMACS Parser. Object + Encapsulation?
 # TODO Solver Logic
 
 from sys import argv, exit
 from dimacs import ParseCNF
-from gsat import GSAT
+from solver import Solver
+
+import random
 
 __program__='FanSATstic - Local Search Sat Solver'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
@@ -36,10 +40,10 @@ def Main():
 	# for c in clauses:
 	# 	print c
 
-	solver = GSAT(num_vars, num_clauses, clauses, len(clauses)/2)
-	res = solver.Solve()
-	print res
-	print FormatResult(res)
+	solver = Solver(num_vars, num_clauses, clauses, num_clauses//2)
+	#res = solver.Solve()
+	print(res)
+	print(FormatResult(res))
 
 #
 #
@@ -71,17 +75,18 @@ def PrintHelp():
 	PrintHelp(): void
 	Prints a help message on stdout
 	"""
-	print __program__
-	print 'Version:', __version__, '\n'
+	print(__program__)
+	print('Version:', __version__, '\n')
 
-	print 'Authors:\n', 
+	print('Authors:\n') 
 	for i in __authors__:
-		print '\t%s' % (i)
+		print('\t%s' % (i))
 	
-	print 'Usage:\n%s <input-file>' % (argv[0])
-	print '\tinput-file must be in dimacs cnf format'
+	print('Usage:\n%s <input-file>' % (argv[0]))
+	print('\tinput-file must be in dimacs cnf format')
 
 #
 #
 if __name__ == '__main__':
+	random.seed(15254354355)
 	Main()

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# WARNING: Converted to python3 but it should run in python 2.7
+
 from sys import stderr
 from itertools import groupby
 
@@ -33,7 +35,7 @@ def ParseCNF(cnf_file):
 				num_clauses = int(lvalues[3])
 
 			else:
-				lvalues = map(int, lvalues)
+				lvalues = list(map(int, lvalues))
 				
 				l = []
 				for val in lvalues:
@@ -51,7 +53,7 @@ def ParseCNF(cnf_file):
 				# cnf_formula.extend(SplitByValue(lvalues, (None, 0)))
 				# [list(g) for k,g in itertools.groupby(iterable,lambda x:x in splitters) if not k]
 
-	except Exception, e:
+	except Exception as e:
 		stderr.write('Error parsing file "%s" (%d): %s' % 
 						(cnf_file.name, num_line, str(e)) )
 		raise e
