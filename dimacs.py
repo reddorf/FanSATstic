@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# WARNING: Converted to python3 but it should run in python 2.7
-
 from sys import stderr
 from itertools import groupby
 

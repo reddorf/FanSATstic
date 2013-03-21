@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# WARNING: Converted to python3 but it should run in python 2.7
+from random import randint
+import satutil
 
-# TODO Check satisify operations
-# TODO Check performans with a set to avoid repeated random interpretations
-
-from random import choice, randint
-
-class Solver(object):
+class GSAT(object):
 
 	choice_values = (True, False) # Used in generate random interpretation
 
@@ -32,12 +28,12 @@ class Solver(object):
 		"""
 		
 		while True:
-			rintp = self.RandomInterpretation()
+			rintp = satutil.RandomInterpretation(self.num_vars)
 			if self.Satisfies(rintp):
 				return rintp
 
 			# Flip some variables
-			for j in range(self.max_flips):
+			for j in xrange(self.max_flips):
 				var_to_flip, num_sat_clauses = self.VariableToFlip(rintp)
 				rintp[var_to_flip] = not rintp[var_to_flip]
 				if(self.num_clauses == num_sat_clauses):
@@ -54,18 +50,20 @@ class Solver(object):
 		"""
 		choosed_variable = 0
 		best_result = -1
+		used_nums = set()
 
-		# Old version checks all the sequentialy
-		# It seems to run faster with random selection
-		for i in range(self.num_vars):
-			ind = randint(0, self.num_vars-1)
-			interpretation[ind] = not interpretation[ind]
-			result = self.NumSatisfiedClauses(interpretation)
-			interpretation[ind] = not interpretation[ind]
+		for i in xrange(self.num_vars):
+			i = randint(0, self.num_vars-1)
+			if not i in used_nums:
+				used_nums.add(i)
 
-			if result > best_result:
-				best_result = result
-				choosed_variable = ind
+				interpretation[i] = not interpretation[i]
+				result = self.NumSatisfiedClauses(interpretation)
+				interpretation[i] = not interpretation[i]
+
+				if result > best_result:
+					best_result = result
+					choosed_variable = i
 
 		return (choosed_variable, best_result)
 
@@ -80,12 +78,8 @@ class Solver(object):
 		satisfied_clauses = 0
 
 		for clause in self.clauses:
-			satc = False
-			for v in (v for v in clause if not satc):
-				satc |= interpretation[v-1] if v > 0 else \
-						not interpretation[-v-1]
-
-			if satc: satisfied_clauses += 1
+			if satutil.IsClauseSatisfied(clause, interpretation):
+				satisfied_clauses += 1
 
 		return satisfied_clauses
 
@@ -98,21 +92,7 @@ class Solver(object):
 		Check if an interpretation satisfies this formula
 		"""
 		for clause in self.clauses:
-			satc = False
-			for v in (v for v in clause if not satc):
-				satc |= interpretation[v-1] if v > 0 else \
-						not interpretation[-v-1]
-			if not satc:
+			if not satutil.IsClauseSatisfied(clause, interpretation):
 				return False
 
 		return True
-
-	#
-	#
-	def RandomInterpretation(self):
-		"""
-		RandomInterpretation(): [boolean]
-
-		Creates a random interpretation for this formula
-		"""
-		return [ choice( Solver.choice_values ) for i in range(self.num_vars) ]

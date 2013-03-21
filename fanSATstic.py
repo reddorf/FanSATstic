@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# WARNING: Converted to python3 but it should run in python 2.7
-
 # TODO Optimize DIMACS Parser. Object + Encapsulation?
 # TODO Solver Logic
 
 from sys import argv, exit
 from dimacs import ParseCNF
-from solver import Solver
+from gsat import GSAT
 
 import random
 
@@ -40,9 +38,9 @@ def Main():
 	# for c in clauses:
 	# 	print c
 
-	solver = Solver(num_vars, num_clauses, clauses, num_clauses//2)
-	#res = solver.Solve()
-	print(res)
+	solver = GSAT(num_vars, num_clauses, clauses, num_clauses//2)
+	res = solver.Solve()
+	#print(res)
 	print(FormatResult(res))
 
 #
