@@ -57,9 +57,3 @@ def ParseCNF(cnf_file):
 		raise e
 
 	return (num_vars, num_clauses, cnf_formula)
-
-#
-#
-def SplitByValue(iterable, spliters):
-	return [list(g) for k,g in 
-						groupby(iterable, lambda x: x in spliters) if not k]

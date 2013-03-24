@@ -9,6 +9,7 @@ from dimacs import ParseCNF
 from gsat import GSAT
 
 import random
+import satutil
 
 __program__='FanSATstic - Local Search Sat Solver'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
@@ -40,7 +41,7 @@ def Main():
 
 	solver = GSAT(num_vars, num_clauses, clauses, num_clauses//2)
 	res = solver.Solve()
-	#print(res)
+	# #print(res)
 	print(FormatResult(res))
 
 #
@@ -49,9 +50,9 @@ def FormatResult(bool_result):
 	s = 'v'
 	for ind,b in enumerate(bool_result):
 		if b:
-			s = s + ' %d' % (ind+1)
+			s = s + ' %d' % (ind)
 		else:
-			s = s + ' %d' % (-(ind+1) )
+			s = s + ' %d' % (-ind )
 	return s
 #
 #
