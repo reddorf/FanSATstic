@@ -12,7 +12,7 @@ def RandomInterpretation(num_vars):
 	mach the range of values on the formula: [-num_vars, -1] U [1, num_vars]
 	"""
 	l = [None]
-	l.extend([ choice( (True, False) ) for i in xrange(num_vars+1) ])
+	l.extend([ choice( (True, False) ) for i in xrange(num_vars) ])
 	return l
 
 #

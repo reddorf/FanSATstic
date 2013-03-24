@@ -56,4 +56,4 @@ def ParseCNF(cnf_file):
 						(cnf_file.name, num_line, str(e)) )
 		raise e
 
-	return (num_vars, num_clauses, cnf_formula)
+	return (num_vars, cnf_formula)

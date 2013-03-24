@@ -9,13 +9,13 @@ class GSAT(object):
 
 	#
 	# Recomended value for max_flips = num_clauses / 10
-	def __init__(self, num_vars, num_clauses, clauses, max_flips):
+	def __init__(self, num_vars, clauses, max_flips):
 		"""
 		Builds a new instance of GSAT
 		"""
 		self.num_vars = num_vars
-		self.num_clauses = num_clauses
 		self.clauses = clauses
+		self.num_clauses = len(clauses)
 		self.max_flips = max_flips
 
 	#
@@ -30,7 +30,6 @@ class GSAT(object):
 		while True:
 			rintp = satutil.RandomInterpretation(self.num_vars)
 			if self.Satisfies(rintp):
-				rintp.remove(None)
 				return rintp
 
 			# Flip some variables
@@ -38,7 +37,6 @@ class GSAT(object):
 				var_to_flip, num_sat_clauses = self.VariableToFlip(rintp)
 				rintp[var_to_flip] = not rintp[var_to_flip]
 				if(self.num_clauses == num_sat_clauses):
-					rintp.remove(None)
 					return rintp
 
 	#
