@@ -7,6 +7,7 @@
 from sys import argv, exit
 from dimacs import ParseCNF
 from gsat import GSAT
+from gwsat import GWSAT
 
 import random
 import satutil
@@ -39,7 +40,7 @@ def Main():
 	# for c in clauses:
 	# 	print c
 
-	solver = GSAT(num_vars, clauses, len(clauses)//2)
+	solver = GWSAT(num_vars, clauses, len(clauses), 0.4)
 	res = solver.Solve()
 	del res[0]	# Solution starts with None. Variable zero doesn't exists
 	#print(res)
@@ -88,5 +89,5 @@ def PrintHelp():
 #
 #
 if __name__ == '__main__':
-	random.seed(15254354355)
+	#random.seed(15254354355)
 	Main()
