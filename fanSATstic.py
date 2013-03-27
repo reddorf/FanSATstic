@@ -89,5 +89,5 @@ def PrintHelp():
 #
 #
 if __name__ == '__main__':
-	#random.seed(15254354355)
+	random.seed(15254354355)
 	Main()
