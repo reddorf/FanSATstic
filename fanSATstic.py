@@ -44,7 +44,8 @@ def Main():
 	res = solver.Solve()
 	del res[0]	# Solution starts with None. Variable zero doesn't exists
 	#print(res)
-	print(FormatResult(res))
+	print 's SATISFIABLE'
+	print FormatResult(res)
 
 #
 #
