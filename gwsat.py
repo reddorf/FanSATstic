@@ -27,7 +27,7 @@ def Solve(num_vars, clauses, max_flips, wprob):
 				if num_sat_clauses == old_sat_clauses:
 					num_sat_clauses = RndWalk(rintp, clauses)
 
-			if(num_clauses == num_sat_clauses):
+			if num_clauses == num_sat_clauses:
 				return rintp
 
 #

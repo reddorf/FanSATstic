@@ -18,8 +18,9 @@ def Solve(num_vars, clauses, max_flips):
 
 	# Weight structure
 	weights = { c: 1 for c in clauses }
-	
+	loops = 0
 	while True:
+		loops += 1
 		rintp = satutil.RandomInterpretation(num_vars)
 		if checkSat(clauses, rintp):
 			return rintp
@@ -31,6 +32,7 @@ def Solve(num_vars, clauses, max_flips):
 			num_sat_clauses = FlipVar(num_vars, clauses, rintp, weights)
 			# print 'Best sat value:', num_sat_clauses
 			if(num_clauses == num_sat_clauses):
+				print loops
 				return rintp
 			incrementUnsatWeights(clauses, rintp, weights)
 

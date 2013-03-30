@@ -11,6 +11,8 @@ import gwsat
 import wgsat
 import wgwsat
 
+import ssolver
+
 import random
 import satutil
 
@@ -47,8 +49,9 @@ def Main():
 	#res = gsat.Solve(num_vars, clauses, max_flips)
 	#res = wgsat.Solve(num_vars,clauses, max_flips)
 	#res = gwsat.Solve(num_vars, clauses, max_flips, 0.4)
-	res = wgwsat.Solve(num_vars, clauses, max_flips, 0.4)
+	#res = wgwsat.Solve(num_vars, clauses, max_flips, 0.4)
 
+	res = ssolver.Solve(num_vars, clauses)
 
 	del res[0]	# Solution starts with None. Variable zero doesn't exists
 	

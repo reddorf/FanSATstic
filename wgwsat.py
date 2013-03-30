@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from random import randint, random, randrange
+from random import random, randrange
 import satutil
 
 def Solve(num_vars, clauses, max_flips, wprob):
@@ -52,8 +52,6 @@ def FlipVar(interpretation, clauses, num_vars, weights):
 
 	interpretation[chosed_variable] = not interpretation[chosed_variable]
 
-	# print 'Best weighted value:', best_result
-	# print 'Chosed Variable:', chosed_variable
 	return satutil.NumSatisfiedClauses(clauses, interpretation)
 
 #
