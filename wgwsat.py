@@ -8,51 +8,53 @@ def Solve(num_vars, clauses, max_flips, wprob):
 	Solve(): [boolean, boolean, ...]
 
 	Tries to find a solution to the given formula using GSAT algorithm
-	"""	
+	"""
+	checkSat = satutil.Satisfies
+	incrementUnsatWeights = satutil.IncrementUnsatWeights
 	num_clauses = len(clauses)
+
+	# Weight structure
+	weights = { c: 1 for c in clauses }
 
 	while True:
 		rintp = satutil.RandomInterpretation(num_vars)
-		if satutil.Satisfies(clauses, rintp):
+		if checkSat(clauses, rintp):
 			return rintp
 
 		# Flip some variables
-		old_sat_clauses = satutil.NumSatisfiedClauses(clauses, rintp)
 		for j in xrange(max_flips):
 			prob = random()
 			if prob < wprob:
 				num_sat_clauses = RndWalk(clauses, rintp)
 			else:
-				num_sat_clauses = FlipVar(rintp, clauses, num_vars)
-				if num_sat_clauses == old_sat_clauses:
-					num_sat_clauses = RndWalk(rintp, clauses)
+				num_sat_clauses = FlipVar(rintp, clauses, num_vars, weights)
 
 			if(num_clauses == num_sat_clauses):
 				return rintp
 
-#
-#
-def FlipVar(interpretation, clauses, num_vars):
-	"""
-	VariableToFlip(interpretation): num_sat_clauses:int
+			incrementUnsatWeights(clauses, rintp, weights)
 
-	Search the best variable to flip and return the index of this variable
-	and the number of satisfied clauses due to this modification
-	"""
-	choosed_variable = 0
+#
+#
+def FlipVar(interpretation, clauses, num_vars, weights):
+	chosed_variable = 0
 	best_result = -1
+	checkNumWSat = satutil.NumSatisfiedWeightedClauses
 
 	for i in xrange(num_vars):
 		interpretation[i] = not interpretation[i]
-		result = satutil.NumSatisfiedClauses(clauses, interpretation)
+		result = checkNumWSat(clauses, interpretation, weights)
 		interpretation[i] = not interpretation[i]
 
 		if result > best_result:
 			best_result = result
-			choosed_variable = i
-	
-	interpretation[choosed_variable] = not interpretation[choosed_variable]
-	return best_result
+			chosed_variable = i
+
+	interpretation[chosed_variable] = not interpretation[chosed_variable]
+
+	# print 'Best weighted value:', best_result
+	# print 'Chosed Variable:', chosed_variable
+	return satutil.NumSatisfiedClauses(clauses, interpretation)
 
 #
 #

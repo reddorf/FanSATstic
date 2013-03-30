@@ -5,9 +5,11 @@ from itertools import groupby
 
 #
 #
-def ParseCNF(cnf_file):
+def ParseCNF(cnf_file, outformat=list):
 	"""
-	parseCNF(f:file): (num_vars:int, num_clauses:int, clauses:[[int,..],..])
+	parseCNF(f:file): (num_vars:int, clauses:outformat(int) )
+
+	- outformat must be an iterable such as tuple or list
 
 	Parse a file in DIMACS CNF format and returns a tuple with three components,
 	the amount of variables, the amount of clauses and a list with the clauses.
@@ -17,7 +19,6 @@ def ParseCNF(cnf_file):
 	num_vars = 0
 	num_clauses = 0
 	cnf_formula = []
-
 	try:
 		for num_line, line in enumerate(cnf_file):
 			lvalues = line.strip().split()
@@ -38,7 +39,10 @@ def ParseCNF(cnf_file):
 				l = []
 				for val in lvalues:
 					if val == 0 and l:
-						cnf_formula.append( l )
+						if outformat == list:
+							cnf_formula.append( l )
+						else:
+							cnf_formula.append( outformat(l) )
 						l = []
 					else:
 						l.append(val)
@@ -56,4 +60,6 @@ def ParseCNF(cnf_file):
 						(cnf_file.name, num_line, str(e)) )
 		raise e
 
+	if outformat != list:
+		cnf_formula = outformat(cnf_formula)
 	return (num_vars, cnf_formula)

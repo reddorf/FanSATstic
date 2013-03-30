@@ -2,6 +2,7 @@
 
 from random import randint
 import satutil
+#import copy
 
 #
 #
@@ -11,36 +12,38 @@ def Solve(num_vars, clauses, max_flips):
 
 	Tries to find a solution to the given formula using GSAT algorithm
 	"""	
-	checkNumSat = satutil.NumSatisfiedClauses
+	checkSat = satutil.Satisfies
+	incrementUnsatWeights = satutil.IncrementUnsatWeights
 	num_clauses = len(clauses)
 
+	# Weight structure
+	weights = { c: 1 for c in clauses }
+	
 	while True:
 		rintp = satutil.RandomInterpretation(num_vars)
-		if satutil.Satisfies(clauses, rintp):
+		if checkSat(clauses, rintp):
 			return rintp
+
+		#weights = copy.copy(bweights)
 
 		# Flip some variables
 		for j in xrange(max_flips):
-			num_sat_clauses = FlipVar(num_vars, clauses, rintp)
+			num_sat_clauses = FlipVar(num_vars, clauses, rintp, weights)
+			# print 'Best sat value:', num_sat_clauses
 			if(num_clauses == num_sat_clauses):
 				return rintp
+			incrementUnsatWeights(clauses, rintp, weights)
 
 #
 #
-def FlipVar(num_vars, clauses, interpretation):
-	"""
-	VariableToFlip(interpretation): (choosed_var:int, num_sat_clauses:int)
-
-	Search the best variable to flip and return the index of this variable
-	and the number of satisfied clauses due to this modification
-	"""
+def FlipVar(num_vars, clauses, interpretation, weights):
 	chosed_variable = 0
 	best_result = -1
-	checkNumSat = satutil.NumSatisfiedClauses
+	checkNumWSat = satutil.NumSatisfiedWeightedClauses
 
 	for i in xrange(num_vars):
 		interpretation[i] = not interpretation[i]
-		result = checkNumSat(clauses, interpretation)
+		result = checkNumWSat(clauses, interpretation, weights)
 		interpretation[i] = not interpretation[i]
 
 		if result > best_result:
@@ -49,4 +52,6 @@ def FlipVar(num_vars, clauses, interpretation):
 
 	interpretation[chosed_variable] = not interpretation[chosed_variable]
 
-	return best_result
+	# print 'Best weighted value:', best_result
+	# print 'Chosed Variable:', chosed_variable
+	return satutil.NumSatisfiedClauses(clauses, interpretation)

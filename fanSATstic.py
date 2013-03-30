@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# TODO Optimize DIMACS Parser. Object + Encapsulation?
 # TODO Solver Logic
 
 from sys import argv, exit
 from dimacs import ParseCNF
-from gsat import GSAT
-from gwsat import GWSAT
+
+import gsat
+import gwsat
+import wgsat
+import wgwsat
 
 import random
 import satutil
@@ -31,19 +33,26 @@ def Main():
 		exit(-1)
 
 	dimacs_file = OpenFileOrDie(argv[1], 'r')
-	num_vars, clauses = ParseCNF(dimacs_file)
+	num_vars, clauses = ParseCNF(dimacs_file, tuple)
 	dimacs_file.close()
 	
 	# print 'Num Variables:', num_vars
-	# print 'Num Clauses:', num_clauses
+	# print 'Num Clauses:', len(clauses)
 	# print 'Clauses:'
 	# for c in clauses:
 	# 	print c
 
-	solver = GWSAT(num_vars, clauses, len(clauses), 0.4)
-	res = solver.Solve()
+	max_flips = len(clauses)//2
+
+	#res = gsat.Solve(num_vars, clauses, max_flips)
+	#res = wgsat.Solve(num_vars,clauses, max_flips)
+	#res = gwsat.Solve(num_vars, clauses, max_flips, 0.4)
+	res = wgwsat.Solve(num_vars, clauses, max_flips, 0.4)
+
+
 	del res[0]	# Solution starts with None. Variable zero doesn't exists
-	#print(res)
+	
+	print 'c Max Flips:', max_flips
 	print 's SATISFIABLE'
 	print FormatResult(res)
 
