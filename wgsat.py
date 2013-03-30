@@ -14,6 +14,7 @@ def Solve(num_vars, clauses, max_flips):
 	"""	
 	checkSat = satutil.Satisfies
 	incrementUnsatWeights = satutil.IncrementUnsatWeights
+	var_range = xrange(1, num_vars+1)
 	num_clauses = len(clauses)
 
 	# Weight structure
@@ -29,21 +30,21 @@ def Solve(num_vars, clauses, max_flips):
 
 		# Flip some variables
 		for j in xrange(max_flips):
-			num_sat_clauses = FlipVar(num_vars, clauses, rintp, weights)
+			num_sat_clauses = FlipVar(var_range, clauses, rintp, weights)
 			# print 'Best sat value:', num_sat_clauses
-			if(num_clauses == num_sat_clauses):
+			if num_clauses == num_sat_clauses:
 				print loops
 				return rintp
 			incrementUnsatWeights(clauses, rintp, weights)
 
 #
 #
-def FlipVar(num_vars, clauses, interpretation, weights):
+def FlipVar(var_range, clauses, interpretation, weights):
 	chosed_variable = 0
 	best_result = -1
 	checkNumWSat = satutil.NumSatisfiedWeightedClauses
 
-	for i in xrange(num_vars):
+	for i in var_range:
 		interpretation[i] = not interpretation[i]
 		result = checkNumWSat(clauses, interpretation, weights)
 		interpretation[i] = not interpretation[i]
@@ -54,6 +55,4 @@ def FlipVar(num_vars, clauses, interpretation, weights):
 
 	interpretation[chosed_variable] = not interpretation[chosed_variable]
 
-	# print 'Best weighted value:', best_result
-	# print 'Chosed Variable:', chosed_variable
 	return satutil.NumSatisfiedClauses(clauses, interpretation)

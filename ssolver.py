@@ -11,7 +11,7 @@ def Solve(num_vars, clauses):
 	num_clauses = len(clauses)
 	rintp = satutil.RandomInterpretation(num_vars)
 	best_num_sat = satutil.NumSatisfiedClauses(clauses, rintp)	
-	var_range = xrange(num_vars)
+	var_range = xrange(1, num_vars+1)
 
 	if best_num_sat == num_clauses:
 		return rintp

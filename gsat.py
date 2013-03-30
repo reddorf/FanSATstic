@@ -13,6 +13,7 @@ def Solve(num_vars, clauses, max_flips):
 	"""	
 	checkNumSat = satutil.NumSatisfiedClauses
 	num_clauses = len(clauses)
+	var_range = xrange(1, num_vars+1)
 
 	while True:
 		rintp = satutil.RandomInterpretation(num_vars)
@@ -21,13 +22,13 @@ def Solve(num_vars, clauses, max_flips):
 
 		# Flip some variables
 		for j in xrange(max_flips):
-			num_sat_clauses = FlipVar(num_vars, clauses, rintp)
-			if(num_clauses == num_sat_clauses):
+			num_sat_clauses = FlipVar(var_range, clauses, rintp)
+			if num_clauses == num_sat_clauses:
 				return rintp
 
 #
 #
-def FlipVar(num_vars, clauses, interpretation):
+def FlipVar(var_range, clauses, interpretation):
 	"""
 	VariableToFlip(interpretation): (choosed_var:int, num_sat_clauses:int)
 
@@ -38,7 +39,7 @@ def FlipVar(num_vars, clauses, interpretation):
 	best_result = -1
 	checkNumSat = satutil.NumSatisfiedClauses
 
-	for i in xrange(num_vars):
+	for i in var_range:
 		interpretation[i] = not interpretation[i]
 		result = checkNumSat(clauses, interpretation)
 		interpretation[i] = not interpretation[i]

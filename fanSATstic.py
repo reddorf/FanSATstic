@@ -10,18 +10,16 @@ import gsat
 import gwsat
 import wgsat
 import wgwsat
-
 import ssolver
 
 import random
-import satutil
 
 __program__='FanSATstic - Local Search Sat Solver'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
 			'Josep Pon Farreny <jpf2@alumnes.udl.cat>']
 __copyright__='Copyright 2013, Marc Piñol Pueyo & Josep Pon Farreny'
 
-__version__='0.2a'
+__version__='0.3a'
 __license__='GPL'
 
 #
@@ -49,25 +47,24 @@ def Main():
 	#res = gsat.Solve(num_vars, clauses, max_flips)
 	#res = wgsat.Solve(num_vars,clauses, max_flips)
 	#res = gwsat.Solve(num_vars, clauses, max_flips, 0.4)
-	#res = wgwsat.Solve(num_vars, clauses, max_flips, 0.4)
+	res = wgwsat.Solve(num_vars, clauses, max_flips, 0.4)
 
-	res = ssolver.Solve(num_vars, clauses)
-
+	#res = ssolver.Solve(num_vars, clauses)
 	del res[0]	# Solution starts with None. Variable zero doesn't exists
 	
 	print 'c Max Flips:', max_flips
 	print 's SATISFIABLE'
-	print FormatResult(res)
+	print 'v', FormatResult(res)
 
 #
 #
 def FormatResult(bool_result):
-	s = 'v'
+	s=''
 	for ind,b in enumerate(bool_result):
 		if b:
-			s = s + ' %d' % (ind+1)
+			s += ' %d' % (ind+1)
 		else:
-			s = s + ' %d' % (-(ind+1) )
+			s += ' %d' % (-(ind+1) )
 	return s
 #
 #
@@ -102,5 +99,5 @@ def PrintHelp():
 #
 #
 if __name__ == '__main__':
-	random.seed(15254354355)
+	#random.seed(15254354355)
 	Main()
