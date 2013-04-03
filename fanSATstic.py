@@ -10,6 +10,7 @@ import gsat
 import gwsat
 import wgsat
 import wgwsat
+import lgwsat
 import ssolver
 
 import random
@@ -33,7 +34,7 @@ def Main():
 		exit(-1)
 
 	dimacs_file = OpenFileOrDie(argv[1], 'r')
-	num_vars, clauses = ParseCNF(dimacs_file, tuple)
+	num_vars, clauses, lit_app = ParseCNF(dimacs_file, tuple)
 	dimacs_file.close()
 	
 	# print 'Num Variables:', num_vars
@@ -47,7 +48,8 @@ def Main():
 	#res = gsat.Solve(num_vars, clauses, max_flips)
 	#res = wgsat.Solve(num_vars,clauses, max_flips)
 	#res = gwsat.Solve(num_vars, clauses, max_flips, 0.4)
-	res = wgwsat.Solve(num_vars, clauses, max_flips, 0.4)
+	#res = wgwsat.Solve(num_vars, clauses, max_flips, 0.4)
+	res = lgwsat.Solve(num_vars, clauses, lit_app, max_flips, 0.4)
 
 	#res = ssolver.Solve(num_vars, clauses)
 	del res[0]	# Solution starts with None. Variable zero doesn't exists

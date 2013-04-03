@@ -19,6 +19,7 @@ def ParseCNF(cnf_file, outformat=list):
 	num_vars = 0
 	num_clauses = 0
 	cnf_formula = []
+	lit_app = {}
 	try:
 		for num_line, line in enumerate(cnf_file):
 			lvalues = line.strip().split()
@@ -35,6 +36,7 @@ def ParseCNF(cnf_file, outformat=list):
 
 			else:
 				lvalues = list(map(int, lvalues))
+				lv = []
 				
 				l = []
 				for val in lvalues:
@@ -43,9 +45,18 @@ def ParseCNF(cnf_file, outformat=list):
 							cnf_formula.append( l )
 						else:
 							cnf_formula.append( outformat(l) )
+						
+						for v in lv:
+							if v in lit_app:
+								lit_app[v].append(l)
+							else:
+								lit_app[v] = [l]
+
 						l = []
 					else:
 						l.append(val)
+						lv.append(val)
+
 						if val < -num_vars or val > num_vars:
 							raise Exception('Invalid variable %d. '
 											'Variables must be in range [1, %d]'
@@ -62,4 +73,4 @@ def ParseCNF(cnf_file, outformat=list):
 
 	if outformat != list:
 		cnf_formula = outformat(cnf_formula)
-	return (num_vars, cnf_formula)
+	return (num_vars, cnf_formula, lit_app)
