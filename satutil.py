@@ -74,7 +74,7 @@ def IncrementUnsatWeights(clauses, interpretation, weights):
             
 #
 #
-def NumSatisifiedLiterals(clause, interpretation):
+def NumSatisfiedLiterals(clause, interpretation):
     
     satlits = 0
     

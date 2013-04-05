@@ -22,7 +22,7 @@ def ParseCNF(fname, outformat=list):
             
             elif    lvalues[0] == 'p':
                 if lvalues[1] != 'cnf':
-                    raise Exception('Invalid format identifier "%s".'
+                    raise SyntaxError('Invalid format identifier "%s".'
                                 % (lvalues[1]) )
                             
                 num_vars = int(lvalues[2])
@@ -31,32 +31,35 @@ def ParseCNF(fname, outformat=list):
                 
             else:
                 values = map(int, lvalues)                    
-                clause = []
+                clause = set()
                 
                 for lit in values:
                     if lit == 0:
-                        if outformat != list:
-                            clause = outformat(clause)
-                        clauses.append( clause )
-                                                    
-                        for l in clause:
-                            alit = abs(l)
-                            litclauses[alit].append(clause)
-                            
+                        if clause not in clauses:                        
+                        
+                            if outformat != list:
+                                clause = outformat(clause)
+                            clauses.append( clause )
+                                                        
+                            for l in clause:
+                                alit = abs(l)
+                                litclauses[alit].append(clause)
+                        else:
+                            print 'Repeated'
                         clause = None # Check line ends with 0
                         
                     else:
-                        clause.append(lit)
+                        clause.add(lit)
 
                         if lit < -num_vars or lit > num_vars:
-                            raise Exception('Invalid literal %d '
+                            raise SyntaxError('Invalid literal %d '
                                 ', it must be in range [1, %d].'
                                 % (lit, num_vars) )
 
                 if clause:
-                    raise Exception('Error not found the trailing 0')
+                    raise SyntaxError('Error not found the trailing 0')
                 
-    except Exception, e:
+    except SyntaxError, e:
         sys.stderr.write('Error parsing file "%s" (%d): %s\n' % 
                                     (fname, nline, str(e)) )
         raise e

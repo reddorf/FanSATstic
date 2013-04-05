@@ -6,10 +6,10 @@
 from sys import argv, exit
 from dimacs import ParseCNF
 
+import time
 import random
-import wgsat
 import gwsat
-import gsat
+import satutil
 
 
 __program__='FanSATstic - Local Search Sat Solver'
@@ -44,6 +44,10 @@ def Main():
     #res = gsat.Solve(num_vars, clauses, litclauses, len(clauses)//2)
     #res = wgsat.Solve(num_vars, clauses, litclauses, len(clauses)//2)
     res = gwsat.Solve(num_vars, clauses, litclauses, len(clauses)//2, 0.4)
+    
+    
+    if not satutil.Satisfies(clauses, res):
+        print 'UNSATISFIABLE'
     del res[0]
     
     print 's SATISFIABLE'
