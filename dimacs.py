@@ -1,59 +1,70 @@
 # -*- coding: utf-8 -*-
 
-from sys import stderr
-from itertools import groupby
+import sys
 
 #
 #
-def ParseCNF(cnf_file):
-	"""
-	parseCNF(f:file): (num_vars:int, num_clauses:int, clauses:[[int,..],..])
+def ParseCNF(fname, outformat=list):
 
-	Parse a file in DIMACS CNF format and returns a tuple with three components,
-	the amount of variables, the amount of clauses and a list with the clauses.
+    num_vars = 0
+    #num_clauses = 0
+    litclauses = None
+    clauses = []
 
-	Raise an exception if there are format errors in the file
-	"""
-	num_vars = 0
-	num_clauses = 0
-	cnf_formula = []
+    cnf_file = open(fname, 'r')    
+    
+    try:
+        for nline, line in enumerate(cnf_file):
+            lvalues = line.strip().split()
+            
+            if not lvalues or lvalues[0] == 'c':
+                continue
+            
+            elif    lvalues[0] == 'p':
+                if lvalues[1] != 'cnf':
+                    raise Exception('Invalid format identifier "%s".'
+                                % (lvalues[1]) )
+                            
+                num_vars = int(lvalues[2])
+                #num_clauses = int(lvalues[3])                
+                litclauses = [[] for i in xrange(num_vars+1)] #range [1, num_vars]
+                
+            else:
+                values = map(int, lvalues)                    
+                clause = []
+                
+                for lit in values:
+                    if lit == 0:
+                        if outformat != list:
+                            clause = outformat(clause)
+                        clauses.append( clause )
+                                                    
+                        for l in clause:
+                            alit = abs(l)
+                            litclauses[alit].append(clause)
+                            
+                        clause = None # Check line ends with 0
+                        
+                    else:
+                        clause.append(lit)
 
-	try:
-		for num_line, line in enumerate(cnf_file):
-			lvalues = line.strip().split()
-			if not lvalues: continue
+                        if lit < -num_vars or lit > num_vars:
+                            raise Exception('Invalid literal %d '
+                                ', it must be in range [1, %d].'
+                                % (lit, num_vars) )
 
-			if lvalues[0] == 'c':
-				continue
+                if clause:
+                    raise Exception('Error not found the trailing 0')
+                
+    except Exception, e:
+        sys.stderr.write('Error parsing file "%s" (%d): %s\n' % 
+                                    (fname, nline, str(e)) )
+        raise e
+        
+    if outformat != list:
+        clauses = outformat(clauses)
+        litclauses = tuple(litclauses)
+    
+    return num_vars, clauses, litclauses
 
-			elif lvalues[0] == 'p':
-				if lvalues[1] != 'cnf':
-					raise Exception("Invalid file type after 'p'")
-				num_vars = int(lvalues[2])
-				num_clauses = int(lvalues[3])
-
-			else:
-				lvalues = list(map(int, lvalues))
-				
-				l = []
-				for val in lvalues:
-					if val == 0 and l:
-						cnf_formula.append( l )
-						l = []
-					else:
-						l.append(val)
-						if val < -num_vars or val > num_vars:
-							raise Exception('Invalid variable %d. '
-											'Variables must be in range [1, %d]'
-											% (val, num_vars))
-							
-				# The same as above in a different way, without checks
-				# cnf_formula.extend(SplitByValue(lvalues, (None, 0)))
-				# [list(g) for k,g in itertools.groupby(iterable,lambda x:x in splitters) if not k]
-
-	except Exception as e:
-		stderr.write('Error parsing file "%s" (%d): %s' % 
-						(cnf_file.name, num_line, str(e)) )
-		raise e
-
-	return (num_vars, cnf_formula)
+    
