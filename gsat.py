@@ -40,7 +40,7 @@ def InitializeClausesData(clauses, intp, csatlits):
                 num_sat_lits += 1
                 
         csatlits[c] = num_sat_lits
-        
+                    
         # If it is different from zero
         if num_sat_lits:
             num_sat_clauses += 1    
@@ -102,5 +102,4 @@ def FlipVar(varclauses, rintp, csatlits, chosed_var):
         if lit in c:
             csatlits[c] += 1
         else:
-            csatlits[c] -= 1
-    
+            csatlits[c] -= 1  

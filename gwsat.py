@@ -6,6 +6,18 @@ import random
 #
 #
 def Solve(num_vars, clauses, litclauses, maxflips, wprob):
+    """
+    Solve(num_vars, clauses, litclauses, maxflips, wprob) -> [None,bool,...]
+
+    Try to find an interpretation that satisfies the given formula.
+
+    The solution is composed by list of boolean values, but the first element
+    (index 0) should be None. Otherwise an error has happened.
+
+    Note: there can't be repeated clauses or literals into a clause in the 
+    formula
+
+    """
     RndInterpretationGenerator = satutil.RandomInterpretation    
     
     num_clauses = len(clauses)
@@ -16,10 +28,7 @@ def Solve(num_vars, clauses, litclauses, maxflips, wprob):
       
     while True:
         rintp = RndInterpretationGenerator(num_vars)
-        num_satclauses = InitializeClausesData(clauses, rintp, csatlits)
-        
-#        print 'Num Clauses:', num_satclauses
-#        print 'Real Num Clauses:', satutil.NumSatisfiedClauses(clauses, rintp)        
+        num_satclauses = InitializeClausesData(clauses, rintp, csatlits)     
         
         if num_satclauses == num_clauses:
             return rintp
@@ -41,7 +50,11 @@ def Solve(num_vars, clauses, litclauses, maxflips, wprob):
 #
 #
 def InitializeClausesData(clauses, intp, csatlits):
-    
+    """
+    InitializeClausesData(clauses, intp, csatlits) -> num_sat_clauses
+
+    Initialize some clauses data given a first random interpretation
+    """
     num_sat_clauses = 0    
     
     for c in clauses:
@@ -114,16 +127,7 @@ def FlipVar(varclauses, rintp, csatlits, chosed_var):
         if lit in c:
             csatlits[c] += 1
         else:
-            csatlits[c] -= 1            
-            
-        expected = satutil.NumSatisfiedLiterals(c, rintp)
-        if expected != csatlits[c]:
-            print'FlipVar'
-            print c, ':', csatlits[c]
-            print 'Expected:', expected        
-            for lit in map(abs,c):
-                print lit,':',rintp[lit]
-            
+            csatlits[c] -= 1                    
             
 #
 #
@@ -168,4 +172,4 @@ def RandomWalk(clauses, litclauses, rintp, csatlits, num_satclauses):
         
         csatlits[c] = satlits
 
-    return num_satclauses        
+    return num_satclauses
