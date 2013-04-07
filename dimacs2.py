@@ -4,11 +4,11 @@ import sys
 
 #
 #
-def ParseCNF(fname, outformat=list):
+def ParseCNF(fname, outformat=frozenset):
 
     num_vars = 0
     litclauses = None
-    clauses = []
+    clauses = set()
 
     cnf_file = open(fname, 'r')    
     
@@ -26,27 +26,28 @@ def ParseCNF(fname, outformat=list):
                             
                 num_vars = int(lvalues[2])
                 #num_clauses = int(lvalues[3])                
-                litclauses = [[] for i in xrange(num_vars+1)] #range [1, num_vars]
-                
+                litclauses = [set() for i in xrange(num_vars+1)] #range [1, num_vars]
+
+            # Parse clause
             else:
-                values = map(int, lvalues)                    
+                values = map(int, lvalues)
                 clause = set()
-                
+
                 for lit in values:
                     if lit == 0:
-                        if clause not in clauses:                        
-                        
-                            if outformat != list:
+                        if clause not in clauses:
+                            
+                            if outformat != set:
                                 clause = outformat(clause)
-                            clauses.append( clause )
-                                                        
+
+                            clauses.add( clause )
                             for l in clause:
                                 alit = abs(l)
-                                litclauses[alit].append(clause)
+                                litclauses[alit].add(clause)
                         else:
                             print 'Repeated'
                         clause = None # Check line ends with 0
-                        
+
                     else:
                         clause.add(lit)
 
@@ -57,16 +58,16 @@ def ParseCNF(fname, outformat=list):
 
                 if clause:
                     raise SyntaxError('Error not found the trailing 0')
-                
+
     except SyntaxError, e:
         sys.stderr.write('Error parsing file "%s" (%d): %s\n' % 
                                     (fname, nline, str(e)) )
-        raise e
-        
-    if outformat != list:
-        clauses = outformat(clauses)
-        litclauses = tuple(litclauses)
-    
-    return num_vars, clauses, litclauses
 
-    
+        raise e
+
+    if outformat != set:
+        clauses = outformat(clauses)
+    litclauses = tuple(litclauses)
+    return num_vars,clauses, litclauses
+
+                
