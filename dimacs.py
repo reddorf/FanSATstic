@@ -1,11 +1,26 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*
 
 import sys
 
 #
 #
 def ParseCNF(fname, outformat=list):
-
+    """
+    Parses the specified file
+    
+    Returns (using the specified format): 
+        - num_variables: Number of variables
+        - clauses: All the clauses
+        - litclauses: A tuple that contains all the clauses where appears the
+                      variable x and it's negate -x sorted by the variable 'name'.
+          
+          For example to traverse all the clauses where appears the variable 
+          2 and -2, simply do:
+              
+              for clause in litclauses[2]:
+                  ... Lots of good code ...
+          
+    """
     num_vars = 0
     litclauses = None
     clauses = []
