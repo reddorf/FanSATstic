@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
-def resolve(c1, c2, var):
-    """
-    Resolution method with clauses c1 and c2 using the variable var
-    """
-    new = frozenset([x for x in c1 if x != var])
-    new = new.union(set([x for x in c2 if x != -var]))
-    return new
-    
-    
+#
+#
 def solve(num_variables, litclauses):
     """
     Solve the given formula using the DP algorithm
@@ -58,4 +50,33 @@ def solve(num_variables, litclauses):
         except KeyError:
             pass
         
-        return True
+        # Delete all the remaining clauses with the variable x or -x
+        removeClausesWithVars(litclauses, x, -x)
+        
+    # After all the iterations there aren't any empty clause
+    return True
+    
+#
+#
+def resolve(c1, c2, var):
+    """
+    Resolution method with clauses c1 and c2 using the variable var
+    """
+    nl = [x for x in c1 if x != var]
+    nl.extend( (x for x in c2 if x != -var) ) # Use a generator to save memory
+    return frozenset(nl)
+    
+#
+#
+def removeClausesWithVars(litclauses, pvar, nvar):
+    
+    for lit, clauses in litclauses.iteritems():
+        # Mark all the items to remove
+        to_remove = []
+        for clause in clauses:
+            if pvar in clause or nvar in clause:
+                to_remove.append(clause)
+        
+        # Remove it
+        for clause in to_remove:
+            clauses.remove(clause)
