@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import dp
 import gsat
 import wgsat
 import gwsat
@@ -27,13 +28,13 @@ def main(options):
     """
     if isLocalSearch(options.algorithm):
         executeLocalSearchAlgorithm(options)
-        
-    #elif isSystematicSearch(options.algorithm):
-                
-        
+
+    elif isSystematicSearch(options.algorithm):
+        executeSystematicSearchAlgorithm(options)
+
     else:
         print 'Unknown algorithm'   # This should never be printed if the argparser works well
-        
+
 #
 #
 def isSystematicSearch(alg):
@@ -50,23 +51,22 @@ def isLocalSearch(alg):
     """
     return alg.lower() in local_search_algs
 
-
 #
 #
 def executeLocalSearchAlgorithm(options):
     """
     Execute the specified algorithm and prints the result
     """
-    
+
     try:
         num_vars, clauses, litclauses=dimacs.parseCNFLocalSearch(options.file)
-        
-        comments = ''    
-    
-        # Chose and run algorithm    
+
+        comments = ''
+
+        # Chose and run algorithm
         res = None
-        if options.algorithm.lower() == 'gsat':
-            
+        if 'gsat' == options.algorithm.lower():
+
             if options.weighted:
                 comments += 'Solved With: Weighted GSAT'
                 res = wgsat.solve(num_vars, clauses, litclauses,
@@ -75,9 +75,9 @@ def executeLocalSearchAlgorithm(options):
                 comments += 'Solved With: GSAT'
                 res = gsat.solve(num_vars, clauses, litclauses,
                                  len(clauses)//2)
-                
-        elif options.algorithm.lower() == 'gwsat':
-            
+
+        elif 'gwsat' == options.algorithm.lower():
+
             if options.weighted:
                 comments += 'Solved With: Weighted GWSAT'
                 res = wgwsat.solve(num_vars, clauses, litclauses,
@@ -88,12 +88,41 @@ def executeLocalSearchAlgorithm(options):
                                   len(clauses)//2, 0.35)
         else:
             raise Exception('Unspecified algorithm')
-       
+
+        # If the formula it is not satisfiable this lines are never executed
         del res[0]
         print 's SATISFIABLE'
         printComments(comments)
         print formatResult(res)
-        
+
+    except Exception, e:
+        print 'Error:', str(e)
+
+#
+#
+def executeSystematicSearchAlgorithm(options):
+    """
+    Execute the specified algorthim and prints the result
+    """
+
+    try:
+        num_vars, litclauses = dimacs.parseCNFSystematicSearch(options.file)
+
+        comments = ''
+
+        if 'dp' == options.algorithm.lower():
+            comments += 'Using DP algorithm\n'
+            comments += '(Alpha version does not show an assignation example)'
+
+            res = dp.solve(num_vars, litclauses)
+
+            printComments(comments)
+            if res:
+                print 's SATISIFIABLE'
+            else:
+                print 'u UNSATISFIABLE'
+                
+
     except Exception, e:
         print 'Error:', str(e)
 
@@ -123,21 +152,21 @@ def printComments(comments):
 #
 # Program entry point
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser(description=__description__)
 
     parser.add_argument('-f', '--file', action='store', default="",
                     required=True, help='Path to a cnf file')
-                    
+
     parser.add_argument('-a', '--algorithm', action='store', default="",
                     help='Specifies which algorithm use to solve the formula',
                     choices=local_search_algs + systematic_search_algs,
                     required=True)
-                    
+
     parser.add_argument('-w', '--weighted', action='store_true',
-                    default=False, 
+                    default=False,
                     help='Uses a weighted version of the algorithms (If exists)')
 
-    options = parser.parse_args()     
-    
+    options = parser.parse_args()
+
     main(options)

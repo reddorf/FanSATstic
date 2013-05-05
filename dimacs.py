@@ -129,7 +129,6 @@ def parseCNFSystematicSearch(fname):
                             
                 num_vars = int(lvalues[2])
                 #num_clauses = int(lvalues[3])                
-                litclauses = [set() for i in xrange(num_vars+1)] #range [1, num_vars]
 
             # Parse clause
             else:
@@ -138,7 +137,10 @@ def parseCNFSystematicSearch(fname):
 
                 for lit in values:
                     
-                    if lit == 0:                        
+                    if lit == 0:           
+                        
+                        clause = frozenset(clause)                        
+                        
                         for l in clause:
                            if not litclauses.has_key(l):
                                litclauses[l] = set()
