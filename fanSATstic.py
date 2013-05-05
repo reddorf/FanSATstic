@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import gsat
 import wgsat
 import gwsat
@@ -14,49 +13,93 @@ __license__='GPL'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
             'Josep Pon Farreny <jpf2@alumnes.udl.cat>']
 
-__description__='FanSATstic v%s - Local Search Sat Solver' % __version__
+__description__='FanSATstic v%s' % __version__
+
+# List of possible algorithms
+local_search_algs = ['gsat', 'gwsat']
+systematic_search_algs = ['dp']
 
 #
 #
-def Main(options):
+def main(options):
     """
     Main(options): void
     """
-    num_vars, clauses, litclauses = dimacs.ParseCNF(options.file, frozenset)
-    
-    comments = ''    
-
-    # Chose and run algorithm    
-    res = None
-    if options.algorithm == 'gsat':
-        if options.weighted:
-            comments += 'Solved With: Weighted GSAT'
-            res = wgsat.Solve(num_vars, clauses, litclauses, len(clauses)//2)
-        else:
-            comments += 'Solved With: GSAT'
-            res = gsat.Solve(num_vars, clauses, litclauses, len(clauses)//2)
-            
-    elif options.algorithm == 'gwsat':
-        if options.weighted:
-            comments += 'Solved With: Weighted GWSAT'
-            res = wgwsat.Solve(num_vars, clauses, litclauses, len(clauses)//2,
-                              0.4)
-        else:
-            comments += 'Solved With: GWSAT'
-            res = gwsat.Solve(num_vars, clauses, litclauses, len(clauses)//2,
-                               0.35)
+    if isLocalSearch(options.algorithm):
+        executeLocalSearchAlgorithm(options)
+        
+    #elif isSystematicSearch(options.algorithm):
+                
+        
     else:
-        sys.exit('Error: Unspecified algorithm')
-   
-    del res[0]
-    print 's SATISFIABLE'
-    PrintComments(comments)
-    print FormatResult(res)
-    
+        print 'Unknown algorithm'   # This should never be printed if the argparser works well
+        
+#
+#
+def isSystematicSearch(alg):
+    """
+    Returns true if the algorithm is one of the local search list
+    """
+    return alg.lower() in systematic_search_algs
 
 #
 #
-def FormatResult(bool_result):
+def isLocalSearch(alg):
+    """
+    Returns true if the algorithm is one of the local search list
+    """
+    return alg.lower() in local_search_algs
+
+
+#
+#
+def executeLocalSearchAlgorithm(options):
+    """
+    Execute the specified algorithm and prints the result
+    """
+    
+    try:
+        num_vars, clauses, litclauses=dimacs.parseCNFLocalSearch(options.file)
+        
+        comments = ''    
+    
+        # Chose and run algorithm    
+        res = None
+        if options.algorithm.lower() == 'gsat':
+            
+            if options.weighted:
+                comments += 'Solved With: Weighted GSAT'
+                res = wgsat.solve(num_vars, clauses, litclauses,
+                                  len(clauses)//2)
+            else:
+                comments += 'Solved With: GSAT'
+                res = gsat.solve(num_vars, clauses, litclauses,
+                                 len(clauses)//2)
+                
+        elif options.algorithm.lower() == 'gwsat':
+            
+            if options.weighted:
+                comments += 'Solved With: Weighted GWSAT'
+                res = wgwsat.solve(num_vars, clauses, litclauses,
+                                   len(clauses)//2, 0.4)
+            else:
+                comments += 'Solved With: GWSAT'
+                res = gwsat.solve(num_vars, clauses, litclauses,
+                                  len(clauses)//2, 0.35)
+        else:
+            raise Exception('Unspecified algorithm')
+       
+        del res[0]
+        print 's SATISFIABLE'
+        printComments(comments)
+        print formatResult(res)
+        
+    except Exception, e:
+        print 'Error:', str(e)
+
+#
+#
+def formatResult(bool_result):
     """
     Returns a textual representation of the result
     """
@@ -70,7 +113,7 @@ def FormatResult(bool_result):
 
 #
 #
-def PrintComments(comments):
+def printComments(comments):
     """
     Prints all the comment lines followed by the comment character
     """
@@ -78,7 +121,7 @@ def PrintComments(comments):
         print 'c', comment
 
 #
-#
+# Program entry point
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description=__description__)
@@ -88,12 +131,13 @@ if __name__ == '__main__':
                     
     parser.add_argument('-a', '--algorithm', action='store', default="",
                     help='Specifies which algorithm use to solve the formula',
-                    choices=['gsat', 'gwsat'], required=True)
+                    choices=local_search_algs + systematic_search_algs,
+                    required=True)
                     
     parser.add_argument('-w', '--weighted', action='store_true',
                     default=False, 
-                    help='Uses a weighted version of the algorithms')
+                    help='Uses a weighted version of the algorithms (If exists)')
 
     options = parser.parse_args()     
     
-    Main(options)
+    main(options)

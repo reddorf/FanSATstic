@@ -4,7 +4,7 @@ from random import choice
 
 #
 #
-def RandomInterpretation(num_vars):
+def randomInterpretation(num_vars):
     """
     RandomInterpretation(num_vars:int): [boolean]
 
@@ -17,7 +17,7 @@ def RandomInterpretation(num_vars):
 
 #
 #
-def IsClauseSatisfied(clause, interpretation):
+def isClauseSatisfied(clause, interpretation):
     """
     IsClauseSatisfied(clause:iterable(int),
                       interpretation:iterable(boolean)): boolean
@@ -32,30 +32,30 @@ def IsClauseSatisfied(clause, interpretation):
 
 #
 #
-def Satisfies(clauses, interpretation):
+def satisfies(clauses, interpretation):
     """
     Satisfies(interpretation: [boolean]): boolean
 
     Check if an interpretation satisfies this formula
     """
     for clause in clauses:
-        if not IsClauseSatisfied(clause, interpretation):
+        if not isClauseSatisfied(clause, interpretation):
             return False
     return True
 
 #
 #
-def NumSatisfiedClauses(clauses, interpretation):
+def numSatisfiedClauses(clauses, interpretation):
     """
     NumSatisfiedClauses(clauses: [], interpretation: [boolean]): int
 
     Count all the satisfied clauses with the given interpretation
     """
-    return sum(1 for c in clauses if IsClauseSatisfied(c, interpretation))
+    return sum(1 for c in clauses if isClauseSatisfied(c, interpretation))
 
 #
 #
-def NumSatisfiedWeightedClauses(clauses, interpretation, weights):
+def numSatisfiedWeightedClauses(clauses, interpretation, weights):
     """
     NumSatisfiedClauses(clauses: [], interpretation: [boolean],
                                                      weights: {clause:int}): int
@@ -63,21 +63,21 @@ def NumSatisfiedWeightedClauses(clauses, interpretation, weights):
     When a clause is satisfied increments the weight of that clause
     """
     return sum(weights[c] for c in clauses \
-                                        if IsClauseSatisfied(c, interpretation))
+                                        if isClauseSatisfied(c, interpretation))
 
 #
 #
-def IncrementUnsatWeights(clauses, interpretation, weights):
+def incrementUnsatWeights(clauses, interpretation, weights):
     """
     Increments the amount of times that a clause was found unsatisfied
     """
     for c in clauses:
-        if not IsClauseSatisfied(c, interpretation):
+        if not isClauseSatisfied(c, interpretation):
             weights[c] += 1
             
 #
 #
-def NumSatisfiedLiterals(clause, interpretation):
+def numSatisfiedLiterals(clause, interpretation):
     """
     Counts the number of satisfied literals with the given interpretation
     """
@@ -93,7 +93,7 @@ def NumSatisfiedLiterals(clause, interpretation):
     
 #
 #
-def InitializeClausesData(clauses, intp, csatlits):
+def initializeClausesData(clauses, intp, csatlits):
     """
     InitializeClausesData(clauses, intp, csatlits) -> num_sat_clauses
 
@@ -119,7 +119,7 @@ def InitializeClausesData(clauses, intp, csatlits):
             
 #
 #
-def ChoseAndFlipVar(litclauses, rintp, csatlits, old_num_satclauses,
+def choseAndFlipVar(litclauses, rintp, csatlits, old_num_satclauses,
                     var_range):
     """
     Chooses and flips the variable that improves or worsens less possible the
@@ -129,20 +129,20 @@ def ChoseAndFlipVar(litclauses, rintp, csatlits, old_num_satclauses,
     chosed_var = 0
     
     for i in var_range:
-        num_sat_change = SatClausesOnIntpChange(litclauses[i], rintp,
+        num_sat_change = satClausesOnIntpChange(litclauses[i], rintp,
                                                 csatlits, old_num_satclauses,
                                                 i)
         if num_sat_change > best_result:
             best_result = num_sat_change
             chosed_var = i
     
-    FlipVar(litclauses[chosed_var], rintp, csatlits, chosed_var)
+    flipVar(litclauses[chosed_var], rintp, csatlits, chosed_var)
     
     return best_result            
 
 #
 #
-def SatClausesOnIntpChange(varclauses, rintp, csatlits, num_satclauses, var):
+def satClausesOnIntpChange(varclauses, rintp, csatlits, num_satclauses, var):
     """
     Counts the number of satisfied clauses after flipping the value of 'var'
     """
@@ -169,7 +169,7 @@ def SatClausesOnIntpChange(varclauses, rintp, csatlits, num_satclauses, var):
     
 #
 #
-def FlipVar(varclauses, rintp, csatlits, chosed_var):
+def flipVar(varclauses, rintp, csatlits, chosed_var):
     """
     Flips the specified variable and updates the amount of satisfied literals
     in all the clauses that it appears
@@ -185,7 +185,7 @@ def FlipVar(varclauses, rintp, csatlits, chosed_var):
             
 #
 #
-def InitializeWeightedClausesData(clauses, intp, csatlits, cweight):
+def initializeWeightedClausesData(clauses, intp, csatlits, cweight):
     """    
     InitializeWeightedClausesData(clauses, intp, csatlits, cweight) 
                                                         -> num_sat_clauses
@@ -214,7 +214,7 @@ def InitializeWeightedClausesData(clauses, intp, csatlits, cweight):
     
 #
 #
-def WeightedChoseAndFlipVar(litclauses, rintp, csatlits, cweight,
+def weightedChoseAndFlipVar(litclauses, rintp, csatlits, cweight,
                             old_num_satclauses, var_range):
     """
     Chooses and flips the variable that improves or worsens less possible the
@@ -225,7 +225,7 @@ def WeightedChoseAndFlipVar(litclauses, rintp, csatlits, cweight,
     chosed_var = 0
     
     for i in var_range:
-        num_sat_change, num_wsat_change = WeightedSatClausesOnIntpChange(
+        num_sat_change, num_wsat_change = weightedSatClausesOnIntpChange(
                                                         litclauses[i],
                                                         rintp, csatlits,
                                                         cweight,
@@ -236,13 +236,13 @@ def WeightedChoseAndFlipVar(litclauses, rintp, csatlits, cweight,
             best_sat_clauses = num_sat_change
             chosed_var = i
     
-    FlipVar(litclauses[chosed_var], rintp, csatlits, chosed_var)
+    flipVar(litclauses[chosed_var], rintp, csatlits, chosed_var)
     
     return best_sat_clauses
     
 #
 #
-def WeightedSatClausesOnIntpChange(varclauses, rintp, csatlits, cweight,
+def weightedSatClausesOnIntpChange(varclauses, rintp, csatlits, cweight,
                                    num_satclauses, var):
     """
     Counts the number of satisfied clauses and it's weight after flipping 

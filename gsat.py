@@ -4,7 +4,7 @@ import satutil
 
 #
 #
-def Solve(num_vars, clauses, litclauses, maxflips):
+def solve(num_vars, clauses, litclauses, maxflips):
     """
     Solve(num_vars, clauses, litclauses, maxflips, wprob) -> [None,bool,...]
 
@@ -17,9 +17,9 @@ def Solve(num_vars, clauses, litclauses, maxflips):
     formula
 
     """    
-    RndInterpretationGenerator = satutil.RandomInterpretation       
-    InitializeClausesData = satutil.InitializeClausesData
-    ChoseAndFlipVar = satutil.ChoseAndFlipVar
+    RndInterpretationGenerator = satutil.randomInterpretation       
+    InitializeClausesData = satutil.initializeClausesData
+    ChoseAndFlipVar = satutil.choseAndFlipVar
     
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)

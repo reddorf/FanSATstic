@@ -4,12 +4,12 @@ import satutil
 
 #
 #
-def Solve(num_vars, clauses, litclauses, maxflips):
+def solve(num_vars, clauses, litclauses, maxflips):
     
-    UpdateUnsatWeights = satutil.IncrementUnsatWeights
-    RndInterpretationGenerator = satutil.RandomInterpretation    
-    InitializeClausesData = satutil.InitializeWeightedClausesData
-    ChoseAndFlipVar = satutil.WeightedChoseAndFlipVar
+    UpdateUnsatWeights = satutil.incrementUnsatWeights
+    RndInterpretationGenerator = satutil.randomInterpretation    
+    InitializeClausesData = satutil.initializeWeightedClausesData
+    ChoseAndFlipVar = satutil.weightedChoseAndFlipVar
     
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)

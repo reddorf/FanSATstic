@@ -5,7 +5,7 @@ import random
 
 #
 #
-def Solve(num_vars, clauses, litclauses, maxflips, wprob):
+def solve(num_vars, clauses, litclauses, maxflips, wprob):
     """
     Solve(num_vars, clauses, litclauses, maxflips, wprob) -> [None,bool,...]
 
@@ -19,10 +19,10 @@ def Solve(num_vars, clauses, litclauses, maxflips, wprob):
 
     """
 
-    UpdateUnsatWeights = satutil.IncrementUnsatWeights
-    RndInterpretationGenerator = satutil.RandomInterpretation    
-    InitializeClausesData = satutil.InitializeWeightedClausesData
-    ChoseAndFlipVar = satutil.WeightedChoseAndFlipVar
+    UpdateUnsatWeights = satutil.incrementUnsatWeights
+    RndInterpretationGenerator = satutil.randomInterpretation    
+    InitializeClausesData = satutil.initializeWeightedClausesData
+    ChoseAndFlipVar = satutil.weightedChoseAndFlipVar
     
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)
@@ -43,7 +43,7 @@ def Solve(num_vars, clauses, litclauses, maxflips, wprob):
             prob = random.random()
                         
             if prob < wprob:
-                num_satclauses = RandomWalk(clauses, litclauses, rintp,
+                num_satclauses = randomWalk(clauses, litclauses, rintp,
                                             csatlits, num_satclauses)
                                             
             else:
@@ -58,7 +58,7 @@ def Solve(num_vars, clauses, litclauses, maxflips, wprob):
     
 #
 #
-def RandomWalk(clauses, litclauses, rintp, csatlits, num_satclauses):
+def randomWalk(clauses, litclauses, rintp, csatlits, num_satclauses):
     
     var = 0    
     
