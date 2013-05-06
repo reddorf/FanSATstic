@@ -55,6 +55,8 @@ def numSatisfiedWeightedClauses(clauses, interpretation, weights):
 def numSatisfiedLiterals(clause, interpretation):
     """
     Counts the number of satisfied literals with the given interpretation
+    
+    Return the number of satisfied literals
     """
     satlits = 0
     
@@ -66,3 +68,29 @@ def numSatisfiedLiterals(clause, interpretation):
             
     return satlits
     
+#
+#
+def isTautology(clause):  
+    """
+    Returns true if the specified clause is a tautology, false otherwise
+    """
+    for l in clause:
+        if -l in clause:
+            return True
+    return False
+#
+#
+def removeTautologies(clauses):
+    """
+    Remove all the clauses that are tautologies from the given list/set of 
+    clauses
+    """
+    tautologies = set()    
+    
+    for c in clauses:
+        if isTautology(c):
+            tautologies.add(c)
+            break
+            
+    for c in tautologies:
+        clauses.remove(c)

@@ -100,25 +100,24 @@ def executeSystematicSearchAlgorithm(options):
     Execute the specified algorthim and prints the result
     """
 
-    try:
-        num_vars, clauses = datautil.parseCNF(options.file)
-        litclauses = datautil.classifyClausesPerLiteral(clauses)
-        comments = ''
-    
-        if 'dp' == options.algorithm.lower():
-            comments += 'Using DP algorithm\n'
-            comments += '(Alpha version does not show an assignation example)'
-    
-            res = dp.solve(num_vars, litclauses)
-    
-            printComments(comments)
-            if res:
-                print 's SATISIFIABLE'
-            else:
-                print 'u UNSATISFIABLE'
+#    try:
+    num_vars, clauses = datautil.parseCNF(options.file)
+    comments = ''
+
+    if 'dp' == options.algorithm.lower():
+        comments += 'Using DP algorithm\n'
+        comments += '(Alpha version does not show an assignation example)'
+
+        res = dp.solve(num_vars, clauses)
+        print 'Res:', res
+        printComments(comments)
+        if res:
+            print 's SATISIFIABLE'
+        else:
+            print 'u UNSATISFIABLE'
                     
-    except Exception, e:
-       print '%s: %s' % (e.__class__.__name__, str(e))
+#    except Exception, e:
+#       print '%s: %s' % (e.__class__.__name__, str(e))
 
 #
 #
