@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import localsearch
+import datautil
 
 #
 #
-def solve(num_vars, clauses, litclauses, maxflips):
+def solve(num_vars, clauses, maxflips):
     
     UpdateUnsatWeights = localsearch.incrementUnsatWeights
     RndInterpretationGenerator = localsearch.randomInterpretation    
@@ -14,6 +15,7 @@ def solve(num_vars, clauses, litclauses, maxflips):
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)
     flip_range = xrange(maxflips)
+    litclauses = datautil.classifyClausesPerVariable(num_vars, clauses)
     
     csatlits = { c: 0 for c in clauses }
     cweight = { c : 1 for c in clauses }

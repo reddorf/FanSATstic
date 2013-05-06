@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import localsearch
+import datautil
 import random
+
 
 #
 #
@@ -26,6 +28,7 @@ def solve(num_vars, clauses, litclauses, maxflips, wprob):
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)
     flip_range = xrange(maxflips)
+    litclauses = datautil.classifyClausesPerVariable(num_vars, clauses)
     
     csatlits = { c: 0 for c in clauses }
       

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import localsearch
+import datautil
 
 #
 #
-def solve(num_vars, clauses, litclauses, maxflips):
+def solve(num_vars, clauses, maxflips):
     """
     Solve(num_vars, clauses, litclauses, maxflips, wprob) -> [None,bool,...]
 
@@ -21,6 +22,7 @@ def solve(num_vars, clauses, litclauses, maxflips):
     InitializeClausesData = localsearch.initializeClausesData
     ChoseAndFlipVar = localsearch.choseAndFlipVar
     
+    litclauses = datautil.classifyClausesPerVariable(num_vars, clauses)
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)
     flip_range = xrange(maxflips)

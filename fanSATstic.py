@@ -60,7 +60,6 @@ def executeLocalSearchAlgorithm(options):
 
     try:
         num_vars, clauses = datautil.parseCNF(options.file)
-        litclauses = datautil.classifyClausesPerVariable(num_vars, clauses)
         comments = ''
 
         # Chose and run algorithm
@@ -69,23 +68,19 @@ def executeLocalSearchAlgorithm(options):
 
             if options.weighted:
                 comments += 'Solved With: Weighted GSAT'
-                res = wgsat.solve(num_vars, clauses, litclauses,
-                                  len(clauses)//2)
+                res = wgsat.solve(num_vars, clauses, len(clauses)//2)
             else:
                 comments += 'Solved With: GSAT'
-                res = gsat.solve(num_vars, clauses, litclauses,
-                                 len(clauses)//2)
+                res = gsat.solve(num_vars, clauses, len(clauses)//2)
 
         elif 'gwsat' == options.algorithm.lower():
 
             if options.weighted:
                 comments += 'Solved With: Weighted GWSAT'
-                res = wgwsat.solve(num_vars, clauses, litclauses,
-                                   len(clauses)//2, 0.4)
+                res = wgwsat.solve(num_vars, clauses, len(clauses)//2, 0.4)
             else:
                 comments += 'Solved With: GWSAT'
-                res = gwsat.solve(num_vars, clauses, litclauses,
-                                  len(clauses)//2, 0.35)
+                res = gwsat.solve(num_vars, clauses, len(clauses)//2, 0.35)
         else:
             raise Exception('Unspecified algorithm')
 
