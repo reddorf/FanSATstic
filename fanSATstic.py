@@ -6,10 +6,10 @@ import gsat
 import wgsat
 import gwsat
 import wgwsat
-import dimacs
 import argparse
+import datautil
 
-__version__='0.2'
+__version__='0.3'
 __license__='GPL'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
             'Josep Pon Farreny <jpf2@alumnes.udl.cat>']
@@ -59,8 +59,8 @@ def executeLocalSearchAlgorithm(options):
     """
 
     try:
-        num_vars, clauses, litclauses=dimacs.parseCNFLocalSearch(options.file)
-
+        num_vars, clauses = datautil.parseCNF(options.file)
+        litclauses = datautil.classifyClausesPerVariable(num_vars, clauses)
         comments = ''
 
         # Chose and run algorithm
@@ -96,7 +96,7 @@ def executeLocalSearchAlgorithm(options):
         print formatResult(res)
 
     except Exception, e:
-        print 'Error:', str(e)
+        print type(e), ':', str(e)
 
 #
 #
@@ -106,25 +106,24 @@ def executeSystematicSearchAlgorithm(options):
     """
 
     try:
-        num_vars, litclauses = dimacs.parseCNFSystematicSearch(options.file)
-
+        num_vars, clauses = datautil.parseCNF(options.file)
+        litclauses = datautil.classifyClausesPerLiteral(clauses)
         comments = ''
-
+    
         if 'dp' == options.algorithm.lower():
             comments += 'Using DP algorithm\n'
             comments += '(Alpha version does not show an assignation example)'
-
+    
             res = dp.solve(num_vars, litclauses)
-
+    
             printComments(comments)
             if res:
                 print 's SATISIFIABLE'
             else:
                 print 'u UNSATISFIABLE'
-                
-
+                    
     except Exception, e:
-        print 'Error:', str(e)
+       print '%s: %s' % (e.__class__.__name__, str(e))
 
 #
 #

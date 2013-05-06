@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import satutil
+import localsearch
 
 #
 #
 def solve(num_vars, clauses, litclauses, maxflips):
     
-    UpdateUnsatWeights = satutil.incrementUnsatWeights
-    RndInterpretationGenerator = satutil.randomInterpretation    
-    InitializeClausesData = satutil.initializeWeightedClausesData
-    ChoseAndFlipVar = satutil.weightedChoseAndFlipVar
+    UpdateUnsatWeights = localsearch.incrementUnsatWeights
+    RndInterpretationGenerator = localsearch.randomInterpretation    
+    InitializeClausesData = localsearch.initializeWeightedClausesData
+    ChoseAndFlipVar = localsearch.weightedChoseAndFlipVar
     
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)

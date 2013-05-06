@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import satutil
+import localsearch
 import random
 
 #
@@ -19,9 +19,9 @@ def solve(num_vars, clauses, litclauses, maxflips, wprob):
 
     """
     # Improve python function-call overhead
-    RndInterpretationGenerator = satutil.randomInterpretation   
-    InitializeClausesData = satutil.initializeClausesData
-    ChoseAndFlipVar = satutil.choseAndFlipVar
+    RndInterpretationGenerator = localsearch.randomInterpretation   
+    InitializeClausesData = localsearch.initializeClausesData
+    ChoseAndFlipVar = localsearch.choseAndFlipVar
     
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)
