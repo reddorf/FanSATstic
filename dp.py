@@ -69,8 +69,8 @@ def removeClausesWithLiteral(lit, clauses, litclauses):
     # The exception KeyError should never happen, as long as the literal 
     # exists in the formula    
     for clause in litclauses[lit]:
-        # The clause could be removed previously because it is associated 
-        # to another literal
+        # The clause could have been removed previously, 
+        # because it can be associated to another literal
         try:
             clauses.remove(clause)
         except KeyError:
