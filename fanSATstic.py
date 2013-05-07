@@ -105,16 +105,16 @@ def executeSystematicSearchAlgorithm(options):
     comments = ''
 
     if 'dp' == options.algorithm.lower():
-        comments += 'Using DP algorithm\n'
-        comments += '(Alpha version does not show an assignation example)'
+        comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
+        comments += 'The DP algorithm do not give a model, only answer if ' \
+                    'the foruma is satisfiable or unsatisfiable'
 
         res = dp.solve(num_vars, clauses)
-        print 'Res:', res
         printComments(comments)
         if res:
             print 's SATISIFIABLE'
         else:
-            print 'u UNSATISFIABLE'
+            print 's UNSATISFIABLE'
                     
 #    except Exception, e:
 #       print '%s: %s' % (e.__class__.__name__, str(e))

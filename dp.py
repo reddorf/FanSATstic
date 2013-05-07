@@ -7,9 +7,9 @@ import satutil
 #
 def solve(num_variables, clauses):
     """
-    Solve the given formula using the DP algorithm
+    Uses the dp algorithm to determine if the formula is satisfiable or 
+    unsatisfiable
     
-    --- TEMPORAL ---
     Returns None if the formula is Unsatisfiable and a fake representation
     if it is Satisfiable
     """
@@ -17,26 +17,26 @@ def solve(num_variables, clauses):
     #satutil.removeTautologies(clauses)
     litclauses = datautil.classifyClausesPerLiteral(clauses)
     variables = range(1, num_variables+1)
-    interpretation = [None for _ in xrange(num_variables+1)]
-    
     while variables:
         
-        if not unitPropagation(variables, clauses, litclauses, interpretation):
-            return None
+        if not unitPropagation(variables, clauses, litclauses):
+            return False
             
         if not variables:
-            return interpretation
-            
+            return True
+        
         var = variables.pop()
+        if not litclauses.has_key(var) and not litclauses.has_key(var):
+            continue
         
-        if not resolution(var, clauses, litclauses, interpretation):
-            return None
+        if not resolution(var, clauses, litclauses):
+            return False
             
-    return interpretation
+    return True
         
 #
 #
-def unitPropagation(variables, clauses, litclauses, interpretation):
+def unitPropagation(variables, clauses, litclauses):
     """
     Search for clauses with only one literal and then remove the unnecessary
     information
@@ -54,7 +54,6 @@ def unitPropagation(variables, clauses, litclauses, interpretation):
         # Variables are represented as possitive numbers
         alit = abs(lit)
         variables.remove(alit)
-        interpretation[alit] = lit > 0        
                 
     return True        
 
@@ -77,7 +76,11 @@ def removeClausesWithLiteral(lit, clauses, litclauses):
         # Remove the clause from the literal's local sets
         for l in clause:
             if l != lit:
-                litclauses[l].remove(clause)
+                lset = litclauses[l]
+                lset.remove(clause)
+                # If empty set for literal l remove its local set
+                if not lset:
+                    del litclauses[l]
     
     del litclauses[lit]
     
@@ -122,7 +125,7 @@ def removeLiteralFromClause(lit, clause):
     
 #
 #
-def resolution(var, clauses, litclauses, interpretation):
+def resolution(var, clauses, litclauses):
     """
     Checks if the specified variable 'var' is a pure literal, if it is not
     then performs resolution
@@ -131,11 +134,9 @@ def resolution(var, clauses, litclauses, interpretation):
     
     # Variable x only appears with one polarity (Pure literal)    
     if litclauses.has_key(var) and not litclauses.has_key(nvar):
-        interpretation[var] = True
         removeClausesWithLiteral(var, clauses, litclauses)
         
     elif not litclauses.has_key(var) and litclauses.has_key(nvar):
-        interpretation[var] = False
         removeClausesWithLiteral(nvar, clauses, litclauses)
 
     # Perform resolution with variable 'var'        
