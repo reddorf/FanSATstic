@@ -8,6 +8,7 @@ import gwsat
 import wgwsat
 import argparse
 import datautil
+import heuristics
 
 __version__='0.3'
 __license__='GPL'
@@ -17,8 +18,20 @@ __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
 __description__='FanSATstic v%s' % __version__
 
 # List of possible algorithms
-local_search_algs = ['gsat', 'gwsat']
-systematic_search_algs = ['dp']
+GSAT = 'gsat'
+GWSAT = 'gwsat'
+local_search_algs = [GSAT, GSAT]
+
+DAVIS_PUTNAM = 'dp'
+systematic_search_algs = [DAVIS_PUTNAM]
+
+# Variable selection heuristics
+MOST_OFTEN = 'most_often'
+MOST_EQUILIBRATED = 'most_equilibrated'
+var_selection_heuristics = { 
+                    MOST_OFTEN : heuristics.mostOftenVariable,
+                    MOST_EQUILIBRATED : heuristics.mostEqulibratedVariable
+                                }
 
 #
 #
@@ -64,7 +77,7 @@ def executeLocalSearchAlgorithm(options):
 
         # Chose and run algorithm
         res = None
-        if 'gsat' == options.algorithm.lower():
+        if GSAT == options.algorithm.lower():
 
             if options.weighted:
                 comments += 'Solved With: Weighted GSAT'
@@ -73,7 +86,7 @@ def executeLocalSearchAlgorithm(options):
                 comments += 'Solved With: GSAT'
                 res = gsat.solve(num_vars, clauses, len(clauses)//2)
 
-        elif 'gwsat' == options.algorithm.lower():
+        elif GWSAT == options.algorithm.lower():
 
             if options.weighted:
                 comments += 'Solved With: Weighted GWSAT'
@@ -104,12 +117,14 @@ def executeSystematicSearchAlgorithm(options):
     num_vars, clauses = datautil.parseCNF(options.file)
     comments = ''
 
-    if 'dp' == options.algorithm.lower():
+    if DAVIS_PUTNAM == options.algorithm.lower():
         comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
         comments += 'The DP algorithm do not give a model, only answer if ' \
                     'the foruma is satisfiable or unsatisfiable'
 
-        res = dp.solve(num_vars, clauses)
+        res = dp.solve(num_vars, clauses,
+                       var_selection_heuristics[options.vselection])
+                       
         printComments(comments)
         if res:
             print 's SATISIFIABLE'
@@ -152,9 +167,16 @@ if __name__ == '__main__':
                     required=True, help='Path to a cnf file')
 
     parser.add_argument('-a', '--algorithm', action='store', default="",
-                    help='Specifies which algorithm use to solve the formula',
                     choices=local_search_algs + systematic_search_algs,
-                    required=True)
+                    required=True, help='Specifies which algorithm use to '
+                                        'solve the formula')
+
+    parser.add_argument('-vsh', '--vselection', action='store',
+                        default=MOST_OFTEN,
+                        choices=var_selection_heuristics.keys(),
+                        help='Specfies the variable selection heuristic.'
+                        'These heuristics are used only in the systematic '
+                        'search algorithms. DEFAULT = %s' % MOST_OFTEN)
 
     parser.add_argument('-w', '--weighted', action='store_true',
                     default=False,

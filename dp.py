@@ -3,9 +3,10 @@
 import datautil
 import satutil
 
+
 #
 #
-def solve(num_variables, clauses):
+def solve(num_variables, clauses, selection_heuristic):
     """
     Uses the dp algorithm to determine if the formula is satisfiable or 
     unsatisfiable
@@ -14,7 +15,6 @@ def solve(num_variables, clauses):
     if it is Satisfiable
     """
     
-    #satutil.removeTautologies(clauses)
     litclauses = datautil.classifyClausesPerLiteral(clauses)
     variables = range(1, num_variables+1)
     while variables:
@@ -25,7 +25,10 @@ def solve(num_variables, clauses):
         if not variables:
             return True
         
-        var = variables.pop()
+        # Select variable
+        var = selection_heuristic(variables, litclauses)
+        variables.remove(var)
+        
         if not litclauses.has_key(var) and not litclauses.has_key(var):
             continue
         
