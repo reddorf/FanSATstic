@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import dp
+import dpll
 import gsat
 import wgsat
 import gwsat
@@ -23,7 +24,8 @@ GWSAT = 'gwsat'
 local_search_algs = [GSAT, GSAT]
 
 DAVIS_PUTNAM = 'dp'
-systematic_search_algs = [DAVIS_PUTNAM]
+DPLL = 'dpll'
+systematic_search_algs = [DAVIS_PUTNAM, DPLL]
 
 # Variable selection heuristics
 MOST_OFTEN = 'most_often'
@@ -116,7 +118,8 @@ def executeSystematicSearchAlgorithm(options):
 #    try:
     num_vars, clauses = datautil.parseCNF(options.file)
     comments = ''
-
+    res = None
+    
     if DAVIS_PUTNAM == options.algorithm.lower():
         comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
         comments += 'The DP algorithm do not give a model, only answer if ' \
@@ -125,11 +128,24 @@ def executeSystematicSearchAlgorithm(options):
         res = dp.solve(num_vars, clauses,
                        var_selection_heuristics[options.vselection])
                        
-        printComments(comments)
-        if res:
-            print 's SATISIFIABLE'
-        else:
-            print 's UNSATISFIABLE'
+        
+            
+    elif DPLL == options.algorithm.lower():
+        comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
+        comments += 'The DP algorithm do not give a model, only answer if ' \
+                    'the foruma is satisfiable or unsatisfiable'
+
+        res = dpll.solve(num_vars, clauses,
+                       var_selection_heuristics[options.vselection])
+                       
+    printComments(comments)
+    if res:
+        print 's SATISIFIABLE'
+        if DAVIS_PUTNAM != options.algorithm.lower():
+            del res[0]
+            print formatResult(res)
+    else:
+        print 's UNSATISFIABLE'
                     
 #    except Exception, e:
 #       print '%s: %s' % (e.__class__.__name__, str(e))

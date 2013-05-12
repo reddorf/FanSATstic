@@ -1,10 +1,22 @@
 # -*- coding: utf-8 -*-
 
+import random
+
+#
+#
+def getRandomAssignation():
+    """
+    getRandomAssignation(): boolean
+    
+    Returns a random truth value (True, False)
+    """
+    return random.choice((True, False))
+
 #
 #
 def isClauseSatisfied(clause, interpretation):
     """
-    IsClauseSatisfied(clause:iterable(int),
+    isClauseSatisfied(clause:iterable(int),
                       interpretation:iterable(boolean)): boolean
 
     Returns true if the given clause is satisfied by the specified
