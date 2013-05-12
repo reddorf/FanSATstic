@@ -131,10 +131,7 @@ def executeSystematicSearchAlgorithm(options):
         
             
     elif DPLL == options.algorithm.lower():
-        comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
-        comments += 'The DP algorithm do not give a model, only answer if ' \
-                    'the foruma is satisfiable or unsatisfiable'
-
+        comments += 'Using DPLL algorithm\n'
         res = dpll.solve(num_vars, clauses,
                        var_selection_heuristics[options.vselection])
                        
