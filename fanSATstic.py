@@ -35,6 +35,10 @@ var_selection_heuristics = {
                     MOST_EQUILIBRATED : heuristics.mostEqulibratedVariable
                                 }
 
+# Some output formats
+SATISFIABLE_OUT = "s SATISFIABLE"
+UNSATISFIABLE_OUT = "s UNSATISFIABLE"
+
 #
 #
 def main(options):
@@ -101,12 +105,12 @@ def executeLocalSearchAlgorithm(options):
 
         # If the formula it is not satisfiable this lines are never executed
         del res[0]
-        print 's SATISFIABLE'
+        print SATISFIABLE_OUT
         printComments(comments)
         print formatResult(res)
 
     except Exception, e:
-        print type(e), ':', str(e)
+       print '%s: %s' % (e.__class__.__name__, str(e))
 
 #
 #
@@ -115,37 +119,37 @@ def executeSystematicSearchAlgorithm(options):
     Execute the specified algorthim and prints the result
     """
 
-#    try:
-    num_vars, clauses = datautil.parseCNF(options.file)
-    comments = ''
-    res = None
-    
-    if DAVIS_PUTNAM == options.algorithm.lower():
-        comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
-        comments += 'The DP algorithm do not give a model, only answer if ' \
-                    'the foruma is satisfiable or unsatisfiable'
-
-        res = dp.solve(num_vars, clauses,
-                       var_selection_heuristics[options.vselection])
-                       
+    try:
+        num_vars, clauses = datautil.parseCNF(options.file)
+        comments = ''
+        res = None
         
+        if DAVIS_PUTNAM == options.algorithm.lower():
+            comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
+            comments += 'The DP algorithm do not give a model, only answer if ' \
+                        'the foruma is satisfiable or unsatisfiable'
+
+            res = dp.solve(num_vars, clauses,
+                           var_selection_heuristics[options.vselection])
+                           
             
-    elif DPLL == options.algorithm.lower():
-        comments += 'Using DPLL algorithm\n'
-        res = dpll.solve(num_vars, clauses,
-                       var_selection_heuristics[options.vselection])
-                       
-    printComments(comments)
-    if res:
-        print 's SATISIFIABLE'
-        if DAVIS_PUTNAM != options.algorithm.lower():
-            del res[0]
-            print formatResult(res)
-    else:
-        print 's UNSATISFIABLE'
+                
+        elif DPLL == options.algorithm.lower():
+            comments += 'Using DPLL algorithm\n'
+            res = dpll.solve(num_vars, clauses,
+                           var_selection_heuristics[options.vselection])
+                           
+        printComments(comments)
+        if res:
+            print SATISFIABLE_OUT
+            if DAVIS_PUTNAM != options.algorithm.lower():
+                del res[0]
+                print formatResult(res)
+        else:
+            print UNSATISFIABLE_OUT
                     
-#    except Exception, e:
-#       print '%s: %s' % (e.__class__.__name__, str(e))
+    except Exception, e:
+       print '%s: %s' % (e.__class__.__name__, str(e))
 
 #
 #
