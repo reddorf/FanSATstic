@@ -9,7 +9,9 @@ import gwsat
 import wgwsat
 import argparse
 import datautil
+import traceback
 import heuristics
+
 
 __version__='0.3'
 __license__='GPL'
@@ -21,7 +23,7 @@ __description__='FanSATstic v%s' % __version__
 # List of possible algorithms
 GSAT = 'gsat'
 GWSAT = 'gwsat'
-local_search_algs = [GSAT, GSAT]
+local_search_algs = [GSAT, GWSAT]
 
 DAVIS_PUTNAM = 'dp'
 DPLL = 'dpll'
@@ -110,7 +112,8 @@ def executeLocalSearchAlgorithm(options):
         print formatResult(res)
 
     except Exception, e:
-       print '%s: %s' % (e.__class__.__name__, str(e))
+        traceback.print_exc()
+        print '%s: %s' % (e.__class__.__name__, str(e))
 
 #
 #
@@ -149,7 +152,8 @@ def executeSystematicSearchAlgorithm(options):
             print UNSATISFIABLE_OUT
                     
     except Exception, e:
-       print '%s: %s' % (e.__class__.__name__, str(e))
+        traceback.print_exc()
+        print '%s: %s' % (e.__class__.__name__, str(e))
 
 #
 #

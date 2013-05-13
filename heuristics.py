@@ -54,12 +54,20 @@ def mostEqulibratedVariable(var_range, litclauses):
     best = -1
     
     for v in var_range:
-        eq_value = 0
+        pvlen = nvlen = 0
+    
         try:
-            eq_value = len(litclauses[v]) * len(litclauses[-v])
+            pvlen = len(litclauses[v]) 
         except KeyError:
             pass
         
+        try:
+            nvlen = len(litclauses[-v])
+        except KeyError:
+            pass
+
+        eq_value = pvlen * nvlen * 1024 + pvlen + nvlen
+            
         if eq_value > best:
             best = eq_value
             var = v

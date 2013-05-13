@@ -7,7 +7,7 @@ import random
 
 #
 #
-def solve(num_vars, clauses, litclauses, maxflips, wprob):
+def solve(num_vars, clauses, maxflips, wprob):
     """
     Solve(num_vars, clauses, litclauses, maxflips, wprob) -> [None,bool,...]
 
