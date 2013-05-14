@@ -3,7 +3,7 @@
 import copy
 import satutil
 import datautil
-import systematicsearch
+from systematicsearch import removeLiteralFromClauses, removeClausesWithLiteral
 
 
 #
@@ -18,7 +18,7 @@ def solve(num_variables, clauses, selection_heuristic):
     """
     
     litclauses = datautil.classifyClausesPerLiteral(clauses)
-    variables = range(1,num_variables+1)
+    variables = set(range(1,num_variables+1))
     interpretation = [None for _ in xrange(num_variables+1)]
     
     # Remove the used variables and its associated clauses and literals
@@ -47,9 +47,9 @@ def _solve(variables, clauses, litclauses, interpretation, heuristic):
         return interpretation
             
     # Copy variables
-    c_variables = copy.deepcopy(variables)    
-    c_clauses = copy.deepcopy(clauses)
-    c_litclauses = copy.deepcopy(litclauses)    
+    c_variables = set(variables)    
+    c_clauses = set(clauses)
+    c_litclauses = dict(litclauses)    
 
     # Unit propagation
     if not _unitPropagation(c_variables, c_clauses, c_litclauses, 
@@ -62,15 +62,19 @@ def _solve(variables, clauses, litclauses, interpretation, heuristic):
             interpretation[v] = satutil.getRandomAssignation()     
         return interpretation
 
+    # Pure literal
+    _pureLiteral(c_variables, c_clauses, c_litclauses, interpretation)
+
+    # All the variables solved by unit propagation 
+    if not c_clauses:
+        for v in c_variables:
+            interpretation[v] = satutil.getRandomAssignation()     
+        return interpretation
+
     # Select variable
     var = heuristic(c_variables, c_litclauses)
     c_variables.remove(var)    
-
-    # Pure literal
-    if _isPureLiteral(var, c_litclauses) or _isPureLiteral(-var, c_litclauses):
-        return _pureLiteral(var, c_variables, c_clauses, c_litclauses,
-                            interpretation, heuristic)
-    
+        
     return _dpllBranch(var, c_variables, c_clauses, c_litclauses, 
                           interpretation, heuristic)
     
@@ -87,12 +91,11 @@ def _unitPropagation(variables, clauses, litclauses, interpretation):
     while unit_lits:
         lit = unit_lits.pop()
                         
-        systematicsearch.removeClausesWithLiteral(lit, clauses, litclauses)
+        removeClausesWithLiteral(lit, clauses, litclauses)
         
         # If removing the literal appears an empty clause return false
         if litclauses.has_key(-lit):
-            if not systematicsearch.removeLiteralFromClauses(-lit, clauses,
-                                                             litclauses):
+            if not removeLiteralFromClauses(-lit, clauses, litclauses):
                 return False
                 
         # Variables are represented as possitive numbers
@@ -109,37 +112,27 @@ def _unitPropagation(variables, clauses, litclauses, interpretation):
                 
     return True
     
-    
 #
 #
-def _isPureLiteral(lit, litclauses):
-    """
-    Return True if the specified literal appears pure in the formula
-    """    
-    return litclauses.has_key(lit) and not litclauses.has_key(-lit)
-    
-#
-#
-def _pureLiteral(var, variables, clauses, litclauses, interpretation, 
-                heuristic):
+def _pureLiteral(variables, clauses, litclauses, interpretation):
                     
-                    
-    nvar = -var
-    if litclauses.has_key(var) and not litclauses.has_key(nvar):
-        interpretation[var] = True
-        systematicsearch.removeClausesWithLiteral(var, clauses, litclauses)
+    pure_lits = set()
+
+    for v in variables:
+        if litclauses.has_key(v) and not litclauses.has_key(-v):
+            pure_lits.add(v)
+        elif not litclauses.has_key(v) and litclauses.has_key(-v):
+            pure_lits.add(-v)
+            
+    for pl in pure_lits:
+        apl = abs(pl)
+        variables.remove(apl)
+        interpretation[apl] = pl > 0
         
-        return _solve(variables, clauses, litclauses, interpretation,
-                      heuristic)
-                      
-    elif not litclauses.has_key(var) and litclauses.has_key(nvar):
-        interpretation[var] = False
-        systematicsearch.removeClausesWithLiteral(nvar, clauses, litclauses)
-        
-        return _solve(variables, clauses, litclauses, interpretation,
-                      heuristic)
-                     
-    return False
+        try:
+            removeClausesWithLiteral(pl, clauses, litclauses)
+        except KeyError:
+            pass
 
 #
 #
@@ -153,9 +146,9 @@ def _dpllBranch(var, variables, clauses, litclauses, interpretation,
     c_litclauses = copy.deepcopy(litclauses)        
     interpretation[var] = True       
     
-    if systematicsearch.removeLiteralFromClauses(nvar, c_clauses, c_litclauses):
+    if removeLiteralFromClauses(nvar, c_clauses, c_litclauses):
         
-        systematicsearch.removeClausesWithLiteral(var, c_clauses, c_litclauses)
+        removeClausesWithLiteral(var, c_clauses, c_litclauses)
         if _solve(variables, c_clauses, c_litclauses, interpretation,
                   heuristic):
             return interpretation          
@@ -165,9 +158,9 @@ def _dpllBranch(var, variables, clauses, litclauses, interpretation,
     c_litclauses = copy.deepcopy(litclauses)       
     interpretation[var] = False
     
-    if systematicsearch.removeLiteralFromClauses(var, c_clauses, c_litclauses):
+    if removeLiteralFromClauses(var, c_clauses, c_litclauses):
         
-        systematicsearch.removeClausesWithLiteral(nvar, c_clauses,c_litclauses)
+        removeClausesWithLiteral(nvar, c_clauses,c_litclauses)
         if _solve(variables, c_clauses, c_litclauses, interpretation,
                   heuristic):
             return interpretation  
