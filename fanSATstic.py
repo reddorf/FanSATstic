@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import dp
-import dpll
+#import dpll #TODO redo the algorithm
 import gsat
 import wgsat
 import gwsat
@@ -12,8 +12,7 @@ import datautil
 import traceback
 import heuristics
 
-
-__version__='0.3'
+__version__='0.4'
 __license__='GPL'
 __authors__=['Marc Piñol Pueyo <mpp5@alumnes.udl.cat>',
             'Josep Pon Farreny <jpf2@alumnes.udl.cat>']
@@ -56,21 +55,12 @@ def main(options):
     else:
         print 'Unknown algorithm'   # This should never be printed if the argparser works well
 
-#
-#
-def isSystematicSearch(alg):
-    """
-    Returns true if the algorithm is one of the local search list
-    """
-    return alg.lower() in systematic_search_algs
 
-#
-#
-def isLocalSearch(alg):
-    """
-    Returns true if the algorithm is one of the local search list
-    """
-    return alg.lower() in local_search_algs
+################
+#              #
+# LOCAL SEARCH #
+#              #
+################
 
 #
 #
@@ -107,13 +97,41 @@ def executeLocalSearchAlgorithm(options):
 
         # If the formula it is not satisfiable this lines are never executed
         del res[0]
-        print SATISFIABLE_OUT
         printComments(comments)
-        print formatResult(res)
+        print formatLocalSearchResult(res)
 
     except Exception, e:
         traceback.print_exc()
         print '%s: %s' % (e.__class__.__name__, str(e))
+
+#
+#
+def formatLocalSearchResult(bool_result):
+    """
+    formatLocalSearchResult(bool_result) -> string
+
+        - bool_result: iterable with the truth value assignation in order
+
+    f.e [True, False, False] has as output:
+
+    s SATISFIABLE
+    v 1 -2 -3
+    """
+    out = '%s\nv' % SATISFIABLE_OUT 
+    
+    for ind,b in enumerate(bool_result):
+        if b:
+            out += ' %d' % (ind+1)
+        else:
+            out += ' %d' % (-(ind+1) )
+    return out
+
+
+#####################
+#                   #
+# SYSTEMATIC SEARCH #
+#                   #
+#####################
 
 #
 #
@@ -134,22 +152,15 @@ def executeSystematicSearchAlgorithm(options):
 
             res = dp.solve(num_vars, clauses,
                            var_selection_heuristics[options.vselection])
-                           
-            
+             
                 
         elif DPLL == options.algorithm.lower():
             comments += 'Using DPLL algorithm\n'
-            res = dpll.solve(num_vars, clauses,
-                           var_selection_heuristics[options.vselection])
+            # res = dpll.solve(num_vars, clauses,
+            #                var_selection_heuristics[options.vselection])
                            
         printComments(comments)
-        if res:
-            print SATISFIABLE_OUT
-            if DAVIS_PUTNAM != options.algorithm.lower():
-                del res[0]
-                print formatResult(res)
-        else:
-            print UNSATISFIABLE_OUT
+        print formatSystematicSearchResult(res)
                     
     except Exception, e:
         traceback.print_exc()
@@ -157,17 +168,69 @@ def executeSystematicSearchAlgorithm(options):
 
 #
 #
-def formatResult(bool_result):
+def formatSystematicSearchResult(result):
     """
-    Returns a textual representation of the result
+    formatSystematicSearchResult(result) -> string
+
+        - result: tuple with two elements
+            result[0]: True/False = SATISFIABLE/UNSATISFIABLE
+            result[1]: It depens on the value of result[0]
+                        True: iterable with the truth value assignation in order
+                        False: iterable with the core clauses
+
+    f.e (True, [True, False, False]) has as output:
+
+    s SATISFIABLE
+    v 1 -2 -3
+
+    f.e (False, ( [1, 2], [-1, 2], [1, -2], [-1, -2] ) ) has as output:
+
+    s UNSATISFIABLE
+    1 2 0
+    -1 2 0
+    1 -2 0
+    -1 -2 0
     """
-    s='v'
-    for ind,b in enumerate(bool_result):
-        if b:
-            s += ' %d' % (ind+1)
-        else:
-            s += ' %d' % (-(ind+1) )
-    return s
+
+    sat, prove = result
+
+    if sat:
+        return formatLocalSearchResult(prove)
+
+    else:
+        core = []
+        biggest_var = 0
+
+        for c in prove:
+            core.append(' '.join( map( lambda x: str(x), c) ) + ' 0')
+            for l in c:
+                biggest_var = max( biggest_var, abs(l) )
+
+        return '%s\np cnf %d %d\n%s' % (UNSATISFIABLE_OUT, biggest_var,
+                                        len(prove), '\n'.join(core) )
+
+
+#############
+#           #
+# UTILITIES #
+#           #
+#############
+
+#
+#
+def isSystematicSearch(alg):
+    """
+    Returns true if the algorithm is one of the local search list
+    """
+    return alg.lower() in systematic_search_algs
+
+#
+#
+def isLocalSearch(alg):
+    """
+    Returns true if the algorithm is one of the local search list
+    """
+    return alg.lower() in local_search_algs
 
 #
 #
@@ -178,8 +241,13 @@ def printComments(comments):
     for comment in comments.splitlines():
         print 'c', comment
 
-#
-# Program entry point
+
+#######################
+#                     #
+# Program entry point #
+#                     #
+#######################
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description=__description__)

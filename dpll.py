@@ -3,8 +3,6 @@
 import copy
 import satutil
 import datautil
-from systematicsearch import removeLiteralFromClauses, removeClausesWithLiteral
-
 
 #
 #
