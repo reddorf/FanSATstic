@@ -26,7 +26,7 @@ local_search_algs = [GSAT, GWSAT]
 
 DAVIS_PUTNAM = 'dp'
 DPLL = 'dpll'
-systematic_search_algs = [DAVIS_PUTNAM, DPLL]
+systematic_search_algs = [DAVIS_PUTNAM]
 
 # Variable selection heuristics
 MOST_OFTEN = 'most_often'
@@ -147,8 +147,9 @@ def executeSystematicSearchAlgorithm(options):
         
         if DAVIS_PUTNAM == options.algorithm.lower():
             comments += 'Using DP algorithm (The orignal DP not DPLL)\n'
-            comments += 'The DP algorithm do not give a model, only answer if ' \
-                        'the foruma is satisfiable or unsatisfiable'
+            comments += 'The DP algorithm do not give a prove of satisfiablity\n'
+            comments += 'If the formula is unsatisfiable, the algorithm gives ' \
+                        'you a core'
 
             res = dp.solve(num_vars, clauses,
                            var_selection_heuristics[options.vselection])
