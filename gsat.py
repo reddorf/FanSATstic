@@ -22,7 +22,7 @@ def solve(num_vars, clauses, maxflips):
     InitializeClausesData = localsearch.initializeClausesData
     ChoseAndFlipVar = localsearch.choseAndFlipVar
     
-    litclauses = datautil.classifyClausesPerVariable(num_vars, clauses)
+    litclauses = datautil.classifyClausesByVariable(num_vars, clauses)
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)
     flip_range = xrange(maxflips)

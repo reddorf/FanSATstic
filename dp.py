@@ -17,7 +17,7 @@ def solve(num_variables, clauses, selection_heuristic):
             (False, frozenset(<core_clause1>, <core_clause2>, ...) ) 
     """
     
-    litclauses = datautil.classifyClausesPerLiteral(clauses)
+    litclauses = datautil.classifyClausesByLiteral(clauses)
     variables = range(1, num_variables+1)
     reason = {} # Clause "parents"
         

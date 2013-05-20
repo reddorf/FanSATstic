@@ -28,7 +28,7 @@ def solve(num_vars, clauses, maxflips, wprob):
     num_clauses = len(clauses)
     var_range = xrange(1, num_vars+1)
     flip_range = xrange(maxflips)
-    litclauses = datautil.classifyClausesPerVariable(num_vars, clauses)    
+    litclauses = datautil.classifyClausesByVariable(num_vars, clauses)    
     
     csatlits = { c: 0 for c in clauses }
     cweight = { c : 1 for c in clauses }

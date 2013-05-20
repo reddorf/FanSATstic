@@ -67,7 +67,7 @@ def parseCNF(fname):
 
 #
 #
-def classifyClausesPerVariable(num_vars, clauses):
+def classifyClausesByVariable(num_vars, clauses):
     """
     Returns a list, sorted by variable value, that at each position contains
     a set with all the clauses where the variable appears
@@ -90,7 +90,7 @@ def classifyClausesPerVariable(num_vars, clauses):
 
 #
 #
-def classifyClausesPerLiteral(clauses):
+def classifyClausesByLiteral(clauses):
     """
     Returns a dictionary that for each literal of the formula contains a set
     with all the clauses where the literal appears
