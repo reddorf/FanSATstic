@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import dp
-#import dpll #TODO redo the algorithm
+import dpll #TODO redo the algorithm
 import gsat
 import wgsat
 import gwsat
@@ -26,7 +26,7 @@ local_search_algs = [GSAT, GWSAT]
 
 DAVIS_PUTNAM = 'dp'
 DPLL = 'dpll'
-systematic_search_algs = [DAVIS_PUTNAM]
+systematic_search_algs = [DAVIS_PUTNAM, DPLL]
 
 # Variable selection heuristics
 MOST_OFTEN = 'most_often'
@@ -157,8 +157,8 @@ def executeSystematicSearchAlgorithm(options):
                 
         elif DPLL == options.algorithm.lower():
             comments += 'Using DPLL algorithm\n'
-            # res = dpll.solve(num_vars, clauses,
-            #                var_selection_heuristics[options.vselection])
+            res = dpll.solve(num_vars, clauses,
+                             var_selection_heuristics[options.vselection])
                            
         printComments(comments)
         print formatSystematicSearchResult(res)
@@ -196,6 +196,7 @@ def formatSystematicSearchResult(result):
     sat, prove = result
 
     if sat:
+        del prove[0]
         return formatLocalSearchResult(prove)
 
     else:

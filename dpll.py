@@ -1,166 +1,293 @@
 # -*- coding: utf-8 -*-
 
-import copy
 import satutil
 import datautil
 
 #
 #
 def solve(num_variables, clauses, selection_heuristic):
-    """
-    Uses the dpll algorithm to determine if the formula is satisifiable
-    or unsatisfiable
-    
-    Returns an interpretation if the formula is satisfiable or None
-    if it is unsatisfiable
-    """
-    
+        
     litclauses = datautil.classifyClausesPerLiteral(clauses)
-    variables = set(range(1,num_variables+1))
-    interpretation = [None for _ in xrange(num_variables+1)]
-    
-    # Remove the used variables and its associated clauses and literals
-    # and saves the assignation to interpretation
-    # As this call is the first one, every variable deleted here it is not
-    # necessary to put it back to check it with other combinations
-    if not _unitPropagation(variables, clauses, litclauses, interpretation):
-        return None    
+    ctimes = { c : 1 for c in clauses } # Clause appearances times
 
-    return _solve(variables, clauses, litclauses, interpretation, 
-                  selection_heuristic)
-       
-#
-#
-def _solve(variables, clauses, litclauses, interpretation, heuristic):
-
-    # All the variables were used the interpretation is now a solution    
-    if not variables:
-        return interpretation 
-    
-    # All the clauses were eliminated without the assignation of some variables
-    # That means that these variables are meaningless
-    if not clauses:
-        for v in variables:
-            interpretation[v] = satutil.getRandomAssignation()     
-        return interpretation
+    # Generates list with variables to be assigned and initial interpretation
+    variables = set()
+    interpretation = [None]
+    for v in xrange(1, num_variables+1):
+        if litclauses.has_key(v) or litclauses.has_key(-v):
+            variables.add(v)
+            interpretation.append(None)
+        else:
+            interpretation.append(satutil.getRandomAssignation())
             
-    # Copy variables
-    c_variables = set(variables)    
-    c_clauses = set(clauses)
-    c_litclauses = dict(litclauses)    
-
-    # Unit propagation
-    if not _unitPropagation(c_variables, c_clauses, c_litclauses, 
-                            interpretation):
-        return None
-        
-    # All the variables solved by unit propagation 
-    if not c_clauses:
-        for v in c_variables:
-            interpretation[v] = satutil.getRandomAssignation()     
-        return interpretation
-
-    # Pure literal
-    _pureLiteral(c_variables, c_clauses, c_litclauses, interpretation)
-
-    # All the variables solved by unit propagation 
-    if not c_clauses:
-        for v in c_variables:
-            interpretation[v] = satutil.getRandomAssignation()     
-        return interpretation
-
-    # Select variable
-    var = heuristic(c_variables, c_litclauses)
-    c_variables.remove(var)    
-        
-    return _dpllBranch(var, c_variables, c_clauses, c_litclauses, 
-                          interpretation, heuristic)
+    return _solve(variables, clauses, ctimes, litclauses, interpretation, 
+                  selection_heuristic)
+    
     
 #
 #
-def _unitPropagation(variables, clauses, litclauses, interpretation):
-    """
-    Search for clauses with only one literal and then remove the unnecessary
-    information
-    """
-    # set of literals that belongs to a unit clause
+def _solve(variables, clauses, ctimes, litclauses, interpretation, heuristic):
+    
+    # Solved by previous assignation
+    if not clauses:
+        return (True, interpretation)
+       
+    used_vars = set()
+    removed_clauses = set()
+    modified_clauses = []
+        
+    if unitPropagation(variables, clauses, ctimes, litclauses, interpretation, 
+                       used_vars, removed_clauses, modified_clauses):
+                           
+        # Recover state of unitPropagation
+        variables.update(used_vars)        
+        reAddRemovedClauses(clauses, ctimes, litclauses, removed_clauses)
+        undoModifiedClauses(clauses, ctimes, litclauses, modified_clauses)
+        return (False, frozenset())
+    
+    # Solved by unitPropagation
+    if not clauses:
+        return (True, interpretation)
+        
+    pureLiteral(variables, clauses, ctimes, litclauses, interpretation,
+                used_vars, removed_clauses, modified_clauses)
+                
+    # Solved by pureLiteral
+    if not clauses:
+        return (True, interpretation)
+
+
+    # select variable to explore
+    var = heuristic(variables, litclauses)
+
+    used_vars.add(var)
+    variables.remove(var)
+    
+    # Recursive Call, internally recovers state between branches
+    # if the return value of previous branch is unsatisfiable
+    res =  dpllBranch(var, variables, clauses, ctimes, litclauses,
+                      interpretation, heuristic)
+                     
+    # Recover state of unitPropagation and pureLiteral
+    if not res[0]:
+        variables.update(used_vars)        
+        reAddRemovedClauses(clauses, ctimes, litclauses, removed_clauses)
+        undoModifiedClauses(clauses, ctimes, litclauses, modified_clauses)
+        
+    return res   
+    
+                      
+#
+#
+def unitPropagation(variables, clauses, ctimes, litclauses, interpretation,
+                    used_vars, removed_clauses, modified_clauses):
+                        
     unit_lits = set([iter(c).next() for c in clauses if len(c) == 1])
     
     while unit_lits:
         lit = unit_lits.pop()
-                        
-        removeClausesWithLiteral(lit, clauses, litclauses)
         
-        # If removing the literal appears an empty clause return false
+        removeClausesWithLiteral(lit, clauses, ctimes, litclauses,
+                                 removed_clauses)
+        
+        # If removing the literal from the other clauses, appears an empty
+        # clause then returns false
         if litclauses.has_key(-lit):
-            if not removeLiteralFromClauses(-lit, clauses, litclauses):
-                return False
+            if removeLiteralFromClauses(-lit, clauses, ctimes, litclauses,
+                                        modified_clauses):
+                return True
                 
-        # Variables are represented as possitive numbers
-        alit = abs(lit)
-        variables.remove(alit)
+        # Remove te used variable
+        var = abs(lit)
+        variables.remove(var)
+        used_vars.add(var)
         
-        # Save the interpretation for var
-        interpretation[alit] = lit > 0
+        # Save interpretation
+        interpretation[var] = lit > 0
         
-        # If all the previous unit lits have been removed check for possible
-        # new unit lits
+        # Check if the last propagations generated more unit clauses        
         if not unit_lits:
             unit_lits = set([iter(c).next() for c in clauses if len(c) == 1])
-                
-    return True
+            
+    return False
     
 #
 #
-def _pureLiteral(variables, clauses, litclauses, interpretation):
+def pureLiteral(variables, clauses, ctimes, litclauses, interpretation,
+                used_vars, removed_clauses, modified_clauses):
                     
+    # Fill pure_lits with all the pure literals in the formula
     pure_lits = set()
-
+    
     for v in variables:
         if litclauses.has_key(v) and not litclauses.has_key(-v):
             pure_lits.add(v)
         elif not litclauses.has_key(v) and litclauses.has_key(-v):
             pure_lits.add(-v)
             
-    for pl in pure_lits:
-        apl = abs(pl)
-        variables.remove(apl)
-        interpretation[apl] = pl > 0
+    # Remove clauses with pure lits
+    while pure_lits:
+        pl = pure_lits.pop()
+        var = abs(pl)
+        variables.remove(var)
+        used_vars.add(var)
         
-        try:
-            removeClausesWithLiteral(pl, clauses, litclauses)
-        except KeyError:
-            pass
-
+        # Save interpretation
+        interpretation[var] = pl > 0
+        
+        # This comprovation avoids an exception when a clause have more than
+        # one pure literal (otherwise the algorithm tries to delete it twice)
+        if litclauses.has_key(pl):
+            removeClausesWithLiteral(pl, clauses, ctimes, litclauses,
+                                     removed_clauses)
+            
+        # Check if the last propagations genereted more pure literals
+        if not pure_lits:
+            for v in variables:
+                if litclauses.has_key(v) and not litclauses.has_key(-v):
+                    pure_lits.add(v)
+                elif not litclauses.has_key(v) and litclauses.has_key(-v):
+                    pure_lits.add(-v)
+            
 #
 #
-def _dpllBranch(var, variables, clauses, litclauses, interpretation, 
-                heuristic):
+def dpllBranch(var, variables, clauses, ctimes, litclauses, interpretation,
+               heuristic):
+    nvar = -var
     
-    nvar = -var    
-    
-    # Positive variable    
-    c_clauses = copy.deepcopy(clauses)
-    c_litclauses = copy.deepcopy(litclauses)        
-    interpretation[var] = True       
-    
-    if removeLiteralFromClauses(nvar, c_clauses, c_litclauses):
+    br_removed_clauses = set()
+    br_modified_clauses = []
         
-        removeClausesWithLiteral(var, c_clauses, c_litclauses)
-        if _solve(variables, c_clauses, c_litclauses, interpretation,
-                  heuristic):
-            return interpretation          
- 
-    # Negative variable
-    c_clauses = copy.deepcopy(clauses)
-    c_litclauses = copy.deepcopy(litclauses)       
+    # Truth value for var = True
+    interpretation[var] = True
+    if not removeLiteralFromClauses(nvar, clauses, ctimes, litclauses,
+                                    br_modified_clauses):
+        removeClausesWithLiteral(var, clauses, ctimes, litclauses,
+                                 br_removed_clauses)
+        res = _solve(variables, clauses, ctimes, litclauses, interpretation,
+                     heuristic)
+                     
+        if res[0]:
+            return res
+            
+    # Rebuild data before start second branch
+    reAddRemovedClauses(clauses, ctimes, litclauses, br_removed_clauses)
+    undoModifiedClauses(clauses, ctimes, litclauses, br_modified_clauses)
+    
+    br_modified_clauses = []
+    br_removed_clauses.clear()
+    
+    # Truth value for var = False
     interpretation[var] = False
+    if not removeLiteralFromClauses(var, clauses, ctimes, litclauses,
+                                    br_modified_clauses):
+        removeClausesWithLiteral(nvar, clauses, ctimes, litclauses,
+                                 br_removed_clauses)
+        res = _solve(variables, clauses, ctimes, litclauses, interpretation,
+                     heuristic)
+        if res[0]:
+            return res
+            
+    reAddRemovedClauses(clauses, ctimes, litclauses, br_removed_clauses)
+    undoModifiedClauses(clauses, ctimes, litclauses, br_modified_clauses)
     
-    if removeLiteralFromClauses(var, c_clauses, c_litclauses):
+    return (False, frozenset())
+         
+#
+#
+def removeClausesWithLiteral(lit, clauses, ctimes, litclauses,
+                             removed_clauses):
+    
+    for clause in litclauses[lit]:
+        # Record clause deletion
+        removed_clauses.add( (clause, ctimes[clause]) )
         
-        removeClausesWithLiteral(nvar, c_clauses,c_litclauses)
-        if _solve(variables, c_clauses, c_litclauses, interpretation,
-                  heuristic):
-            return interpretation  
+#        if clause in clauses:
+        clauses.remove(clause)
+        ctimes[clause] = 0
+        
+        # Remove the clause from literal's local sets
+        for l in clause:
+            if l != lit:
+                lset = litclauses[l]
+                lset.remove(clause)
+                # If empty set for literal l remove its local set
+                if not lset:
+                    del litclauses[l]
+
+    del litclauses[lit]
+        
+#
+#
+def removeLiteralFromClauses(lit, clauses, ctimes, litclauses,
+                             modified_clauses):
     
-    return None
+    for clause in litclauses[lit]:                
+        nc = frozenset([x for x in clause if x != lit])
+        
+        if not nc:
+            return True
+
+        # Record clause modification
+        modified_clauses.append( (nc, clause, ctimes[clause]) )
+
+        # Delete clause
+        clauses.remove(clause)        
+        clauses.add(nc)
+        
+        # Update times
+        ctimes[clause] = 0
+        try:
+            ctimes[nc] += 1
+        except KeyError:
+            ctimes[nc] = 1
+        
+        # Update clause on literal's local sets
+        for l in nc:
+            lset = litclauses[l]
+            lset.remove(clause)
+            lset.add(nc)
+                
+    del litclauses[lit]                
+        
+    return False  
+    
+#
+#
+def reAddRemovedClauses(clauses, ctimes, litclauses, removed_clauses):
+    
+    for clause, t in removed_clauses:
+        clauses.add(clause)
+        ctimes[clause] = t
+        
+        for l in clause:
+            if not litclauses.has_key(l):
+                litclauses[l] = set()
+            litclauses[l].add(clause)
+            
+#
+#
+def undoModifiedClauses(clauses, ctimes, litclauses, modified_clauses):
+        
+    # k = current clause, v = (old_clause, removed literal)
+    for nclause, clause, t in reversed(modified_clauses):
+        
+        # Remove the current clause if only appears once
+        ctimes[nclause] -= 1
+        if ctimes[nclause] == 0:
+            clauses.remove(nclause)
+          
+        # Add the old clause
+        clauses.add(clause)
+        ctimes[clause] = t
+        
+        for l in clause:
+            if not litclauses.has_key(l):
+                litclauses[l] = set()
+                litclauses[l].add(clause)
+            else:
+                lset = litclauses[l]
+                if nclause in lset:
+                    if ctimes[nclause] == 0:
+                        lset.remove(nclause)
+                lset.add(clause)                   
