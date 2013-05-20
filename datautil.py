@@ -117,3 +117,16 @@ def classifyClausesByLiteral(clauses):
             litclauses[l].add(clause)
             
     return litclauses
+    
+#
+#
+def isPureLiteral(lit, litclauses):
+    """
+    isPureLiteral(lit, litclauses)    
+    
+    - lit: literal value, f.e: -1, 1, 3, -2, ...
+    - litclauses: Dictionary returned by classifyClausesByLiteral(...)    
+    
+    Returns true if the specified lit is a pure literal
+    """
+    return litclauses.has_key(lit) and not litclauses.has_key(-lit)
