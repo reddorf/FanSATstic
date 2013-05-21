@@ -1,17 +1,17 @@
 FanSATstic
 ==========
 
-This project is the solution given to a university's assignment.
+This project is the solution given to a university assignment.
 
 First it was created for a local search SAT solvers competition.
 But as we are seeing more algorithms these ones are being integrated to the original solver.
 
-
+All the algorithms are first added as a test version and then are improved step by step.
 
 ********************************
 Algorithms and Program Arguments
 
-                                 |
+
 + To specify the path to the cnf formula file
 	
 	-f/--file {FILE}
@@ -25,6 +25,7 @@ Algorithms and Program Arguments
 		- gsat      [GSAT]
 		- gwsat     [GWSAT]
 		- dp        [Davis-Putnam]
+		- dpll		[Davis-Putnam-Logemann-Loveland]
 
 + To specify the variable selection heuristic
 
@@ -33,6 +34,7 @@ Algorithms and Program Arguments
 	This argument is only used by the following algorithms:
 
 		- dp
+		- dpll
 
 + To use a weighted version of the algorithms
 
